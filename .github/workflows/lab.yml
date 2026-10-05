@@ -1,0 +1,14 @@
+name: Lab
+on:
+  push:
+    branches: [lab]
+jobs:
+  lab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip -q install onnx onnxruntime numpy pillow matplotlib huggingface_hub tokenizers
+      - run: python lab/lab.py
