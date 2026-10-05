@@ -2,6 +2,8 @@ name: Lab
 on:
   push:
     branches: [lab]
+permissions:
+  contents: write
 jobs:
   lab:
     runs-on: ubuntu-latest
@@ -11,4 +13,10 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip -q install onnx onnxruntime numpy pillow matplotlib huggingface_hub tokenizers
-      - run: python lab/lab.py
+      - run: python lab/lab.py > out.txt 2>&1 || echo "EXIT $?" >> out.txt
+      - if: always()
+        run: |
+          mkdir res && cp out.txt res/ && cp -r imgs res/ 2>/dev/null || true
+          cd res && git init -q -b lab-out && git config user.name ci && git config user.email ci@example.com
+          git add . && git commit -q -m out
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" lab-out
