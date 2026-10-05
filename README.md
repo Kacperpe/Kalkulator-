@@ -2,10 +2,12 @@
 
 Naukowy kalkulator na Androida (Kotlin, bez zewnętrznych bibliotek), układ wzorowany na Casio.
 
-**Funkcje:** + − × ÷, potęgi, pierwiastki (√, ∛, ʸ√x), x⁻¹, silnia, %, log/ln/10ˣ/eˣ,
-sin/cos/tan i funkcje odwrotne (SHIFT), hiperboliczne (hyp), nPr/nCr, π, e, Ans, notacja ×10ˣ,
-tryby DEG/RAD/GRAD, przełącznik S⇔D (ułamek ↔ liczba dziesiętna), kursor ◀ ▶, DEL/AC.
-Żółte napisy nad klawiszami to funkcje po wciśnięciu **SHIFT**.
+**Funkcje:** + − × ÷, potęgi, pierwiastki (√, ³√, ˣ√), x⁻¹, silnia, %, mod, log/ln/logₓy/10ˣ/eˣ,
+sin/cos/tan/cot i funkcje odwrotne, hiperboliczne (hyp), nPr/nCr, GCD/LCM, Ceil/Floor, π, e, Ans/PreAns,
+całka ∫(f, a, b), pochodna d/dx(f, a), Σ i Π (po zmiennej x), zmienne a–d, f, x, y, t i pamięć M (STO/RCL, M+/M−),
+tryby DEG/RAD/GRAD, S⇔D (ułamek ↔ dziesiętna), ENG, historia, kopiuj/wklej, krzyżak (◀ ▶ kursor, ▲ ▼ historia).
+Żółte napisy nad klawiszami to funkcje po **SHIFT**, fioletowe po **ALPHA**.
+Klawisze bez implementacji (MATRIX, STAT, CMPLX, SOLVE itd.) pokazują „Funkcja niedostępna".
 
 ## Pobranie APK
 

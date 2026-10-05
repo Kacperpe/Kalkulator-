@@ -9,6 +9,7 @@ import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.asin
 import kotlin.math.atan
+import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.ln
@@ -25,18 +26,27 @@ enum class AngleMode { DEG, RAD, GRAD }
 class CalcException(message: String) : Exception(message)
 
 /**
- * Parser rekurencyjny wyrażeń: + - × ÷ ^ ! % nPr (P) nCr (C), funkcje trygonometryczne,
- * hiperboliczne, log/ln, pierwiastki, stałe π i e, Ans, notacja E (np. 5E3), mnożenie domyślne (2π, 3sin(30)).
+ * Parser rekurencyjny wyrażeń: + - × ÷ ^ ! % mod, nPr (P), nCr (C), pierwiastek n-tego stopnia (~),
+ * funkcje trygonometryczne i hiperboliczne, log/ln, stałe π i e, Ans, notacja E (5E3),
+ * mnożenie domyślne (2π, 3sin(30)), zmienne ($a, $x ...) oraz
+ * int(f,a,b), diff(f,a), sum(f,a,b), prod(f,a,b) liczone po zmiennej $x.
  */
-class Evaluator(private val mode: AngleMode = AngleMode.DEG, private val ans: Double = 0.0) {
+class Evaluator(
+    private val mode: AngleMode = AngleMode.DEG,
+    private val ans: Double = 0.0,
+    private val vars: Map<Char, Double> = emptyMap()
+) {
     private var s = ""
     private var p = 0
 
     private val names = listOf(
-        "asinh", "acosh", "atanh", "sinh", "cosh", "tanh",
-        "asin", "acos", "atan", "sqrt", "cbrt",
-        "sin", "cos", "tan", "log", "abs", "rand", "ln", "pi", "e"
-    )
+        "asinh", "acosh", "atanh", "ranint", "floor", "sinh", "cosh", "tanh",
+        "asin", "acos", "atan", "acot", "sqrt", "cbrt", "ceil", "logb", "diff", "prod", "rand",
+        "sin", "cos", "tan", "cot", "log", "abs", "gcd", "lcm", "int", "sum", "ln", "pi", "e"
+    ).sortedByDescending { it.length }
+
+    private val lazyNames = setOf("int", "diff", "sum", "prod")
+    private val twoArgNames = setOf("logb", "gcd", "lcm", "ranint")
 
     fun evaluate(expr: String): Double {
         s = expr.replace(" ", "")
@@ -68,7 +78,7 @@ class Evaluator(private val mode: AngleMode = AngleMode.DEG, private val ans: Do
 
     private fun startsPrimary(): Boolean {
         val c = peek()
-        return c.isDigit() || c == '.' || c == '(' || c == '√' || c in 'a'..'z' || c == 'A'
+        return c.isDigit() || c == '.' || c == '(' || c == '√' || c == '$' || c in 'a'..'z' || c == 'A'
     }
 
     private fun parseTerm(): Double {
@@ -82,6 +92,12 @@ class Evaluator(private val mode: AngleMode = AngleMode.DEG, private val ans: Do
                     val d = parseUnary()
                     if (d == 0.0) mathError()
                     v /= d
+                }
+                s.startsWith("mod", p) -> {
+                    p += 3
+                    val d = parseUnary()
+                    if (d == 0.0) mathError()
+                    v -= d * floor(v / d)
                 }
                 startsPrimary() -> v *= parseUnary()
                 else -> return v
@@ -112,6 +128,11 @@ class Evaluator(private val mode: AngleMode = AngleMode.DEG, private val ans: Do
             val exp = parsePowerOperand()
             return base.pow(exp)
         }
+        if (peek() == '~') {
+            p++
+            val radicand = parsePowerOperand()
+            return root(radicand, base)
+        }
         return base
     }
 
@@ -119,6 +140,15 @@ class Evaluator(private val mode: AngleMode = AngleMode.DEG, private val ans: Do
         '-' -> { p++; -parsePowerOperand() }
         '+' -> { p++; parsePowerOperand() }
         else -> parsePower()
+    }
+
+    private fun root(x: Double, n: Double): Double {
+        if (n == 0.0) mathError()
+        if (x < 0) {
+            if (isInt(n) && abs(n) % 2.0 == 1.0) return -((-x).pow(1.0 / n))
+            mathError()
+        }
+        return x.pow(1.0 / n)
     }
 
     private fun parsePostfix(): Double {
@@ -148,6 +178,12 @@ class Evaluator(private val mode: AngleMode = AngleMode.DEG, private val ans: Do
                 if (x < 0) mathError()
                 return sqrt(x)
             }
+            c == '$' -> {
+                p++
+                if (p >= s.length) syntaxError()
+                val name = s[p++]
+                return vars[name] ?: 0.0
+            }
             c == 'A' -> {
                 if (s.startsWith("Ans", p)) { p += 3; return ans }
                 syntaxError()
@@ -159,6 +195,10 @@ class Evaluator(private val mode: AngleMode = AngleMode.DEG, private val ans: Do
 
     private fun closeParen() {
         if (peek() == ')') p++ else if (p < s.length) syntaxError()
+    }
+
+    private fun comma() {
+        if (peek() == ',') p++ else syntaxError()
     }
 
     private fun parseNumber(): Double {
@@ -190,9 +230,76 @@ class Evaluator(private val mode: AngleMode = AngleMode.DEG, private val ans: Do
         }
         if (peek() != '(') syntaxError()
         p++
+        if (name in lazyNames) return parseLazy(name)
         val x = parseExpr()
+        val result = if (name in twoArgNames) {
+            comma()
+            val y = parseExpr()
+            applyFunc2(name, x, y)
+        } else {
+            applyFunc(name, x)
+        }
         closeParen()
-        return applyFunc(name, x)
+        return result
+    }
+
+    /** Funkcje, których pierwszy argument jest wyrażeniem zależnym od $x. */
+    private fun parseLazy(name: String): Double {
+        val start = p
+        var depth = 0
+        while (p < s.length) {
+            val ch = s[p]
+            if (ch == '(') depth++
+            else if (ch == ')') { if (depth == 0) break; depth-- }
+            else if (ch == ',' && depth == 0) break
+            p++
+        }
+        if (peek() != ',') syntaxError()
+        val body = s.substring(start, p)
+        p++
+        if (body.isEmpty()) syntaxError()
+        val a = parseExpr()
+        var b = 0.0
+        if (name != "diff") {
+            comma()
+            b = parseExpr()
+        }
+        closeParen()
+        val f = { x: Double -> Evaluator(mode, ans, vars + ('x' to x)).evaluate(body) }
+        return when (name) {
+            "int" -> simpson(f, a, b)
+            "diff" -> derivative(f, a)
+            "sum" -> series(f, a, b, false)
+            else -> series(f, a, b, true)
+        }
+    }
+
+    private fun simpson(f: (Double) -> Double, a: Double, b: Double): Double {
+        if (a == b) return 0.0
+        val n = 2000
+        val h = (b - a) / n
+        var sum = f(a) + f(b)
+        for (i in 1 until n) sum += f(a + i * h) * (if (i % 2 == 1) 4.0 else 2.0)
+        return clean(sum * h / 3.0)
+    }
+
+    private fun derivative(f: (Double) -> Double, a: Double): Double {
+        val h = 1e-3 * max(1.0, abs(a))
+        val d1 = (f(a + h) - f(a - h)) / (2 * h)
+        val d2 = (f(a + h / 2) - f(a - h / 2)) / h
+        return clean((4 * d2 - d1) / 3.0)
+    }
+
+    private fun series(f: (Double) -> Double, a: Double, b: Double, product: Boolean): Double {
+        if (!isInt(a) || !isInt(b) || a > b || b - a > 100000) mathError()
+        var acc = if (product) 1.0 else 0.0
+        var i = a
+        while (i <= b) {
+            val v = f(i)
+            if (product) acc *= v else acc += v
+            i += 1.0
+        }
+        return acc
     }
 
     private fun toRad(x: Double): Double = when (mode) {
@@ -217,9 +324,15 @@ class Evaluator(private val mode: AngleMode = AngleMode.DEG, private val ans: Do
             if (abs(cos(r)) < 1e-14) mathError()
             clean(tan(r))
         }
+        "cot" -> {
+            val r = toRad(x)
+            if (abs(sin(r)) < 1e-14) mathError()
+            clean(cos(r) / sin(r))
+        }
         "asin" -> { if (abs(x) > 1) mathError(); clean(fromRad(asin(x))) }
         "acos" -> { if (abs(x) > 1) mathError(); clean(fromRad(acos(x))) }
         "atan" -> clean(fromRad(atan(x)))
+        "acot" -> if (x == 0.0) fromRad(PI / 2) else clean(fromRad(atan(1.0 / x)))
         "sinh" -> Math.sinh(x)
         "cosh" -> Math.cosh(x)
         "tanh" -> Math.tanh(x)
@@ -231,7 +344,38 @@ class Evaluator(private val mode: AngleMode = AngleMode.DEG, private val ans: Do
         "sqrt" -> { if (x < 0) mathError(); sqrt(x) }
         "cbrt" -> Math.cbrt(x)
         "abs" -> abs(x)
+        "ceil" -> ceil(x)
+        "floor" -> floor(x)
         else -> syntaxError()
+    }
+
+    private fun applyFunc2(name: String, x: Double, y: Double): Double = when (name) {
+        "logb" -> {
+            if (x <= 0 || x == 1.0 || y <= 0) mathError()
+            clean(ln(y) / ln(x))
+        }
+        "gcd" -> gcd(x, y)
+        "lcm" -> {
+            val g = gcd(x, y)
+            if (g == 0.0) 0.0 else abs(x * y) / g
+        }
+        "ranint" -> {
+            if (!isInt(x) || !isInt(y) || x > y) mathError()
+            x + floor(Math.random() * (y - x + 1))
+        }
+        else -> syntaxError()
+    }
+
+    private fun gcd(a: Double, b: Double): Double {
+        if (!isInt(a) || !isInt(b) || abs(a) > 9e15 || abs(b) > 9e15) mathError()
+        var x = abs(a).toLong()
+        var y = abs(b).toLong()
+        while (y != 0L) {
+            val t = x % y
+            x = y
+            y = t
+        }
+        return x.toDouble()
     }
 
     private fun isInt(x: Double) = x == floor(x) && !x.isInfinite()
@@ -278,6 +422,16 @@ object Formatter {
             return "${mant}×10^$exp"
         }
         return BigDecimal(v).round(MathContext(10)).stripTrailingZeros().toPlainString()
+    }
+
+    /** Notacja inżynierska: wykładnik będący wielokrotnością 3. */
+    fun eng(v: Double): String {
+        if (v == 0.0) return "0"
+        val exp = floor(log10(abs(v)))
+        val e3 = (floor(exp / 3.0) * 3).toInt()
+        val mant = v / Math.pow(10.0, e3.toDouble())
+        val m = BigDecimal(mant).round(MathContext(10)).stripTrailingZeros().toPlainString()
+        return "${m}×10^$e3"
     }
 
     /** Ułamek zwykły (ułamki łańcuchowe), albo null gdy liczba jest całkowita / nie da się jej ładnie zapisać. */

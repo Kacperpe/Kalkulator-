@@ -100,4 +100,34 @@ class EvaluatorTest {
         assertNull(Formatter.toFraction(4.0))
         assertNull(Formatter.toFraction(Math.PI))
     }
+
+    @Test fun variablesAndExtras() {
+        val v = mapOf('a' to 3.0, 'x' to 2.0)
+        assertEquals(6.0, Evaluator(AngleMode.DEG, 0.0, v).evaluate("2\$a"), 1e-9)
+        assertEquals(12.0, Evaluator(AngleMode.DEG, 0.0, v).evaluate("\$a\$x^2"), 1e-9)
+        assertEv(1.0, "7mod3")
+        assertEv(2.0, "3~8")
+        assertEv(-2.0, "3~(−8)")
+        assertEv(3.0, "logb(2,8)")
+        assertEv(6.0, "gcd(12,18)")
+        assertEv(36.0, "lcm(12,18)")
+        assertEv(3.0, "ceil(2.1)")
+        assertEv(2.0, "floor(2.9)")
+        assertEv(1.0, "cot(45)")
+        assertEv(45.0, "acot(1)")
+    }
+
+    @Test fun calculus() {
+        assertEquals(9.0, ev("int(\$x^2,0,3)"), 1e-7)
+        assertEquals(6.0, ev("diff(\$x^2,3)"), 1e-7)
+        assertEv(55.0, "sum(\$x,1,10)")
+        assertEv(120.0, "prod(\$x,1,5)")
+        assertEquals(2.0, ev("int(sin(\$x),0,π)", AngleMode.RAD), 1e-7)
+        assertFails("int(\$x^2,0)")
+    }
+
+    @Test fun engineering() {
+        assertEquals("12.345×10^3", Formatter.eng(12345.0))
+        assertEquals("500×10^-6", Formatter.eng(0.0005))
+    }
 }
