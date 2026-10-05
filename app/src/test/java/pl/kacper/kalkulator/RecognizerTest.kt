@@ -1,9 +1,6 @@
 package pl.kacper.kalkulator
 
-import java.awt.RenderingHints
-import java.awt.image.BufferedImage
 import java.io.File
-import javax.imageio.ImageIO
 import org.junit.Assert.assertEquals
 import org.junit.Assume
 import org.junit.Test
@@ -16,15 +13,14 @@ class RecognizerTest {
     private val assets = File("src/main/assets")
     private val images = File("src/test/resources/mfr")
 
+    /** Plik .rgb to 384×384 pikseli, po 3 bajty (R, G, B). */
     private fun input(name: String): FloatArray {
-        val src = ImageIO.read(File(images, name))
-        val scaled = BufferedImage(Pre.SIZE, Pre.SIZE, BufferedImage.TYPE_INT_RGB)
-        val g = scaled.createGraphics()
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
-        g.drawImage(src, 0, 0, Pre.SIZE, Pre.SIZE, null)
-        g.dispose()
-        val px = IntArray(Pre.SIZE * Pre.SIZE)
-        scaled.getRGB(0, 0, Pre.SIZE, Pre.SIZE, px, 0, Pre.SIZE)
+        val raw = File(images, name).readBytes()
+        val n = Pre.SIZE * Pre.SIZE
+        assertEquals(n * 3, raw.size)
+        val px = IntArray(n) { k ->
+            ((raw[3 * k].toInt() and 255) shl 16) or ((raw[3 * k + 1].toInt() and 255) shl 8) or (raw[3 * k + 2].toInt() and 255)
+        }
         return Pre.toChw(px)
     }
 
@@ -32,7 +28,7 @@ class RecognizerTest {
         val enc = File(assets, "mfr_encoder.onnx")
         val dec = File(assets, "mfr_decoder.onnx")
         val voc = File(assets, "mfr_vocab.txt")
-        Assume.assumeTrue(enc.exists() && dec.exists() && voc.exists() && File(images, "t0.png").exists())
+        Assume.assumeTrue(enc.exists() && dec.exists() && voc.exists() && File(images, "t0.rgb").exists())
         val rec = FormulaRecognizer(enc.path, dec.path, voc.readLines(Charsets.UTF_8))
 
         fun code(name: String): String {
@@ -46,19 +42,19 @@ class RecognizerTest {
             return MathTools.solve(fn("(" + parts[0] + ")-(" + parts[1] + ")"))
         }
 
-        val c0 = code("t0.png")
+        val c0 = code("t0.rgb")
         assertEquals("2\$x+5=11", c0)
         assertEquals(listOf(3.0), solve(c0))
 
-        assertEquals(1.5, fn(code("t1.png"))(1.0), 1e-9)
+        assertEquals(1.5, fn(code("t1.rgb"))(1.0), 1e-9)
 
-        val r2 = solve(code("t2.png"))
+        val r2 = solve(code("t2.rgb"))
         assertEquals(1, r2.size)
         assertEquals(-2.0, r2[0], 1e-6)
 
-        assertEquals(32.5, fn(code("t3.png"))(0.0), 1e-9)
+        assertEquals(32.5, fn(code("t3.rgb"))(0.0), 1e-9)
 
-        val r4 = solve(code("t4.png"))
+        val r4 = solve(code("t4.rgb"))
         assertEquals(3, r4.size)
         assertEquals(-3.0, r4[0], 1e-6)
         assertEquals(0.5, r4[1], 1e-6)

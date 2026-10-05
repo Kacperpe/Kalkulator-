@@ -50,6 +50,9 @@ enc = ort.InferenceSession(os.path.join(ASSETS, "mfr_encoder.onnx"), providers=[
 dec = ort.InferenceSession(os.path.join(ASSETS, "mfr_decoder.onnx"), providers=["CPUExecutionProvider"])
 for i in range(len(FORMULAS)):
     img = Image.open(os.path.join(TESTS, f"t{i}.png")).convert("RGB").resize((384, 384), Image.BILINEAR)
+    # surowe piksele RGB dla testu jednostkowego (bez zależności od bibliotek graficznych)
+    with open(os.path.join(TESTS, f"t{i}.rgb"), "wb") as raw:
+        raw.write(np.asarray(img).astype(np.uint8).tobytes())
     x = ((np.asarray(img).astype(np.float32) / 255.0 - 0.5) / 0.5).transpose(2, 0, 1)[None]
     h = enc.run(None, {"pixel_values": x})[0]
     ids = [2]
