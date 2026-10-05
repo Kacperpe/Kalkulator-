@@ -2,9 +2,11 @@ package pl.kacper.kalkulator
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -18,6 +20,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.InputType
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -32,9 +35,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.FileProvider
+import java.io.File
 import kotlin.math.abs
 
 /** Krzyżak nawigacyjny: lewo/prawo przesuwa kursor, góra/dół przegląda historię. */
@@ -98,6 +104,11 @@ class DPadView(context: Context, private val onDir: (Int) -> Unit) : View(contex
 
 class MainActivity : Activity() {
 
+    private companion object {
+        const val REQ_CAMERA = 71
+        const val REQ_GALLERY = 72
+    }
+
     private class Tok(val d: String, val c: String)
     private class Hist(val toks: List<Tok>, val value: Double)
     private class Style(
@@ -130,6 +141,11 @@ class MainActivity : Activity() {
     private var statsText = ""
     private var matA = ""
     private var matB = ""
+    private var drawer: View? = null
+    private var scrim: View? = null
+    private var drawerOpen = false
+    private var drawerWidth = 0
+    private var recognizer: FormulaRecognizer? = null
 
     // ---- widoki ----
     private lateinit var statusView: TextView
@@ -146,6 +162,7 @@ class MainActivity : Activity() {
     private var cShift = 0
     private var cAlpha = 0
     private var cDim = 0
+    private var cPanel = 0
     private lateinit var fnStyle: Style
     private lateinit var numStyle: Style
     private lateinit var pillStyle: Style
@@ -180,6 +197,11 @@ class MainActivity : Activity() {
                 numStyle = Style(col(0xFF2C2C31), col(0xFF1F1F23), col(0xFF3B3B42), 16, Color.WHITE, 27f, 110f)
                 pillStyle = Style(col(0xFF2A2B30), col(0xFF1E1F23), col(0xFF4A4B52), 22, cText, 13f, 1f)
             }
+        }
+        cPanel = when (theme) {
+            1 -> col(0xFFFFFFFF)
+            2 -> col(0xFF14233A)
+            else -> col(0xFF1E1F24)
         }
     }
 
@@ -572,15 +594,6 @@ class MainActivity : Activity() {
         root.orientation = LinearLayout.VERTICAL
         root.background = dottedBg()
         root.setPadding(dp(6), dp(6), dp(6), dp(6))
-        root.setOnApplyWindowInsetsListener { v, insets ->
-            v.setPadding(
-                dp(6) + insets.systemWindowInsetLeft,
-                dp(6) + insets.systemWindowInsetTop,
-                dp(6) + insets.systemWindowInsetRight,
-                dp(6) + insets.systemWindowInsetBottom
-            )
-            insets
-        }
 
         // linia wskaźników
         statusView = TextView(this)
@@ -624,7 +637,7 @@ class MainActivity : Activity() {
         // pasek pigułek
         val spacer = View(this)
         spacer.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1.6f)
-        val pillHist = key("≡", st = pillStyle, labeled = false) { showMenu() }
+        val pillHist = key("≡", st = pillStyle, labeled = false, raw = true) { openDrawer() }
         val pillCopy = weighted(key("COPY", st = pillStyle, labeled = false) { copyResult() }, 1.3f)
         val pillPaste = weighted(key("PASTE", st = pillStyle, labeled = false) { paste() }, 1.3f)
         val pillAngle = key("DEG", st = pillStyle, labeled = false) { cycleAngle() }
@@ -771,8 +784,54 @@ class MainActivity : Activity() {
             )
         )
 
-        setContentView(root)
-        root.requestApplyInsets()
+        // panel boczny wysuwany z lewej
+        val frame = FrameLayout(this)
+        frame.addView(root, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        val sc = View(this)
+        sc.setBackgroundColor(0x99000000.toInt())
+        sc.visibility = View.GONE
+        sc.setOnClickListener { closeDrawer() }
+        frame.addView(sc, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        drawerWidth = (resources.displayMetrics.widthPixels * 0.8f).toInt()
+        val list = LinearLayout(this)
+        list.orientation = LinearLayout.VERTICAL
+        drawerHeader(list, "ZE ZDJĘCIA")
+        drawerItem(list, "Zrób zdjęcie równania") { takePhoto() }
+        drawerItem(list, "Wybierz zdjęcie z galerii") { pickImage() }
+        drawerHeader(list, "NARZĘDZIA")
+        drawerItem(list, "Historia") { showHistory() }
+        drawerItem(list, "Wykres funkcji") { graphDialog() }
+        drawerItem(list, "Rozwiąż równanie") { solveDialog() }
+        drawerItem(list, "Własne funkcje f, g, h") { functionsDialog() }
+        drawerItem(list, "Teoria liczb") { numberTheory() }
+        drawerItem(list, "Postacie liczby") { numberForms() }
+        drawerItem(list, "Statystyka") { statsDialog() }
+        drawerItem(list, "Macierze") { matrixDialog() }
+        drawerHeader(list, "WYGLĄD")
+        drawerItem(list, "Skórka") { themeDialog() }
+        val sv = ScrollView(this)
+        sv.setBackgroundColor(cPanel)
+        sv.addView(list)
+        sv.translationX = -drawerWidth.toFloat()
+        sv.elevation = dp(16).toFloat()
+        sv.isClickable = true
+        frame.addView(sv, FrameLayout.LayoutParams(drawerWidth, ViewGroup.LayoutParams.MATCH_PARENT))
+        drawer = sv
+        scrim = sc
+        drawerOpen = false
+        frame.setOnApplyWindowInsetsListener { _, insets ->
+            root.setPadding(
+                dp(6) + insets.systemWindowInsetLeft,
+                dp(6) + insets.systemWindowInsetTop,
+                dp(6) + insets.systemWindowInsetRight,
+                dp(6) + insets.systemWindowInsetBottom
+            )
+            list.setPadding(insets.systemWindowInsetLeft, dp(8) + insets.systemWindowInsetTop, 0, dp(12) + insets.systemWindowInsetBottom)
+            insets
+        }
+
+        setContentView(frame)
+        frame.requestApplyInsets()
         refresh()
     }
 
@@ -822,27 +881,225 @@ class MainActivity : Activity() {
         AlertDialog.Builder(this).setTitle(title).setView(sv).setPositiveButton("OK", null).show()
     }
 
-    private fun showMenu() {
-        val items = arrayOf<CharSequence>(
-            "Historia", "Wykres funkcji", "Rozwiąż równanie", "Własne funkcje f, g, h",
-            "Teoria liczb", "Postacie liczby", "Statystyka", "Macierze", "Skórka"
-        )
-        AlertDialog.Builder(this).setTitle("Narzędzia").setItems(items) { _, i ->
+    // ---- panel boczny ----
+    private fun drawerHeader(parent: LinearLayout, text: String) {
+        val tv = TextView(this)
+        tv.text = text
+        tv.textSize = 12f
+        tv.typeface = Typeface.DEFAULT_BOLD
+        tv.setTextColor(cAlpha)
+        tv.setPadding(dp(20), dp(18), dp(20), dp(6))
+        parent.addView(tv)
+    }
+
+    private fun drawerItem(parent: LinearLayout, text: String, action: () -> Unit) {
+        val tv = TextView(this)
+        tv.text = text
+        tv.textSize = 16f
+        tv.setTextColor(cText)
+        tv.setPadding(dp(20), dp(14), dp(20), dp(14))
+        val pressed = GradientDrawable()
+        pressed.setColor(cDim)
+        val normal = GradientDrawable()
+        normal.setColor(Color.TRANSPARENT)
+        val sl = StateListDrawable()
+        sl.addState(intArrayOf(android.R.attr.state_pressed), pressed)
+        sl.addState(intArrayOf(), normal)
+        tv.background = sl
+        tv.setOnClickListener {
+            closeDrawer()
             message = null
             isError = false
-            when (i) {
-                0 -> showHistory()
-                1 -> graphDialog()
-                2 -> solveDialog()
-                3 -> functionsDialog()
-                4 -> numberTheory()
-                5 -> numberForms()
-                6 -> statsDialog()
-                7 -> matrixDialog()
-                else -> themeDialog()
-            }
+            action()
             refresh()
-        }.show()
+        }
+        parent.addView(tv, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+    }
+
+    private fun openDrawer() {
+        val dv = drawer ?: return
+        val sc = scrim ?: return
+        drawerOpen = true
+        sc.visibility = View.VISIBLE
+        sc.alpha = 0f
+        sc.animate().alpha(1f).setDuration(180).start()
+        dv.animate().translationX(0f).setDuration(180).start()
+    }
+
+    private fun closeDrawer() {
+        val dv = drawer ?: return
+        val sc = scrim ?: return
+        drawerOpen = false
+        sc.animate().alpha(0f).setDuration(150).withEndAction { sc.visibility = View.GONE }.start()
+        dv.animate().translationX(-drawerWidth.toFloat()).setDuration(150).start()
+    }
+
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+    override fun onBackPressed() {
+        if (drawerOpen) closeDrawer() else super.onBackPressed()
+    }
+
+    // ---- wzór ze zdjęcia ----
+    private fun photoFile(): File {
+        val dir = File(cacheDir, "photos")
+        dir.mkdirs()
+        return File(dir, "shot.jpg")
+    }
+
+    @Suppress("DEPRECATION")
+    private fun takePhoto() {
+        try {
+            val f = photoFile()
+            if (f.exists()) f.delete()
+            val uri = FileProvider.getUriForFile(this, packageName + ".files", f)
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+            intent.clipData = ClipData.newRawUri("photo", uri)
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivityForResult(intent, REQ_CAMERA)
+        } catch (e: Exception) {
+            note("Nie udało się otworzyć aparatu")
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun pickImage() {
+        try {
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "image/*"
+            startActivityForResult(intent, REQ_GALLERY)
+        } catch (e: Exception) {
+            note("Nie udało się otworzyć galerii")
+        }
+    }
+
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != REQ_CAMERA && requestCode != REQ_GALLERY) return
+        if (resultCode != RESULT_OK) return
+        val bmp = try {
+            if (requestCode == REQ_CAMERA) {
+                val f = photoFile()
+                PhotoUtil.decode({ if (f.exists()) f.inputStream() else null })
+            } else {
+                val u = data?.data
+                if (u == null) null else PhotoUtil.decode({ contentResolver.openInputStream(u) })
+            }
+        } catch (e: Exception) {
+            null
+        }
+        if (bmp == null) {
+            note("Nie udało się wczytać zdjęcia")
+            refresh()
+            return
+        }
+        cropDialog(bmp)
+    }
+
+    private fun cropDialog(bmp: Bitmap) {
+        val dlg = Dialog(this, android.R.style.Theme_Black_NoTitleBar)
+        val box = LinearLayout(this)
+        box.orientation = LinearLayout.VERTICAL
+        box.setBackgroundColor(Color.BLACK)
+        val hint = TextView(this)
+        hint.text = "Obejmij ramką jeden wzór"
+        hint.setTextColor(Color.WHITE)
+        hint.textSize = 16f
+        hint.gravity = Gravity.CENTER
+        hint.setPadding(dp(12), dp(14), dp(12), dp(10))
+        box.addView(hint)
+        val cv = CropView(this, bmp)
+        box.addView(cv, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+        val bar = LinearLayout(this)
+        bar.orientation = LinearLayout.HORIZONTAL
+        bar.setPadding(dp(10), dp(8), dp(10), dp(12))
+        val cancel = Button(this)
+        cancel.text = "Anuluj"
+        cancel.setOnClickListener { dlg.dismiss() }
+        val ok = Button(this)
+        ok.text = "Rozpoznaj"
+        ok.setOnClickListener {
+            val crop = cv.result()
+            dlg.dismiss()
+            recognize(crop)
+        }
+        bar.addView(cancel, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        bar.addView(ok, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        box.addView(bar)
+        dlg.setContentView(box)
+        dlg.show()
+    }
+
+    @Synchronized
+    private fun getRecognizer(): FormulaRecognizer {
+        val existing = recognizer
+        if (existing != null) return existing
+        val dir = File(filesDir, "mfr")
+        dir.mkdirs()
+        val stamp = packageManager.getPackageInfo(packageName, 0).lastUpdateTime.toString()
+        val mark = File(dir, "stamp")
+        val fresh = mark.exists() && mark.readText() == stamp
+        for (name in arrayOf("mfr_encoder.onnx", "mfr_decoder.onnx")) {
+            val out = File(dir, name)
+            if (!fresh || !out.exists()) {
+                assets.open(name).use { input -> out.outputStream().use { output -> input.copyTo(output) } }
+            }
+        }
+        mark.writeText(stamp)
+        val vocab = assets.open("mfr_vocab.txt").bufferedReader(Charsets.UTF_8).use { it.readLines() }
+        val r = FormulaRecognizer(File(dir, "mfr_encoder.onnx").path, File(dir, "mfr_decoder.onnx").path, vocab)
+        recognizer = r
+        return r
+    }
+
+    private fun recognize(crop: Bitmap) {
+        val progress = AlertDialog.Builder(this).setMessage("Rozpoznaję wzór…").setCancelable(false).show()
+        Thread {
+            val outcome: Pair<String?, String?> = try {
+                Pair(getRecognizer().recognize(PhotoUtil.toInput(crop)), null)
+            } catch (t: Throwable) {
+                Pair(null, t.javaClass.simpleName + ": " + (t.message ?: ""))
+            }
+            runOnUiThread {
+                if (!isFinishing && !isDestroyed) {
+                    progress.dismiss()
+                    val latex = outcome.first
+                    if (latex != null) showRecognized(latex) else textDialog("Błąd rozpoznawania", outcome.second ?: "")
+                }
+            }
+        }.start()
+    }
+
+    private fun showRecognized(latex: String) {
+        val pretty = Latex.compact(latex)
+        try {
+            val items = Latex.convert(latex)
+            val shown = items.joinToString("") { it.d }
+            AlertDialog.Builder(this).setTitle("Rozpoznany wzór")
+                .setMessage("Odczytano:\n" + shown + "\n\nLaTeX:\n" + pretty)
+                .setPositiveButton("Wstaw") { _, _ ->
+                    clearAll()
+                    for (it in items) tokens.add(Tok(it.d, it.c))
+                    cursor = tokens.size
+                    message = null
+                    isError = false
+                    if (items.any { it.c == "=" }) solveDialog()
+                    else if (items.none { it.c.startsWith("\$") }) calculate()
+                    refresh()
+                }
+                .setNegativeButton("Anuluj", null)
+                .show()
+        } catch (e: CalcException) {
+            AlertDialog.Builder(this).setTitle("Rozpoznany wzór")
+                .setMessage("LaTeX:\n" + pretty + "\n\nNie umiem tego przeliczyć:\n" + (e.message ?: ""))
+                .setPositiveButton("Kopiuj LaTeX") { _, _ ->
+                    val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    cm.setPrimaryClip(ClipData.newPlainText("LaTeX", pretty))
+                }
+                .setNegativeButton("OK", null)
+                .show()
+        }
     }
 
     private fun graphDialog() {

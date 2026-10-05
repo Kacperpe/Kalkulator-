@@ -23,14 +23,24 @@ jobs:
         with:
           gradle-version: '8.7'
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Model rozpoznawania wzorów (pobranie i zmniejszenie)
+        run: |
+          pip -q install onnx onnxruntime numpy pillow matplotlib huggingface_hub
+          python tools/prepare_model.py 2>&1 | tee model.log
+          ls -la app/src/main/assets
+
       - name: Testy jednostkowe
-        run: gradle testDebugUnitTest --no-daemon
+        run: gradle testDebugUnitTest --no-daemon 2>&1 | tee test.log
 
       - name: Build APK
-        run: gradle assembleRelease --no-daemon
+        run: gradle assembleRelease --no-daemon 2>&1 | tee build.log
 
       - name: Przygotuj plik
-        run: cp app/build/outputs/apk/release/app-release.apk Kalkulator.apk
+        run: cp app/build/outputs/apk/release/app-release.apk Kalkulator.apk && ls -la Kalkulator.apk
 
       - name: Opublikuj w Releases
         uses: softprops/action-gh-release@v2
@@ -47,3 +57,17 @@ jobs:
           git config user.email "actions@github.com"
           git add . && git commit -q -m "APK v${{ github.run_number }}"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" apk
+
+      - name: Zapisz logi budowania w gałęzi ci-log
+        if: always()
+        run: |
+          mkdir log-out
+          for f in model.log test.log build.log; do [ -f "$f" ] && tail -n 400 "$f" > "log-out/$f" || true; done
+          find app/build/test-results -name '*.xml' -exec cp {} log-out/ \; 2>/dev/null || true
+          ls -la Kalkulator.apk > log-out/apk-size.txt 2>/dev/null || true
+          cd log-out
+          git init -q -b ci-log
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add . && git commit -q -m "Logi v${{ github.run_number }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-log
