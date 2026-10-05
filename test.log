@@ -1,0 +1,38 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.7/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugResValues
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:mergeDebugResources
+> Task :app:parseDebugLocalResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugManifestForPackage
+> Task :app:processDebugResources
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///home/runner/work/Kalkulator-/Kalkulator-/app/src/test/java/pl/kacper/kalkulator/MathToolsTest.kt:53:9 'assertEquals(Array<(out) Any!>!, Array<(out) Any!>!): Unit' is deprecated. Deprecated in Java
+w: file:///home/runner/work/Kalkulator-/Kalkulator-/app/src/test/java/pl/kacper/kalkulator/MathToolsTest.kt:54:9 'assertEquals(Array<(out) Any!>!, Array<(out) Any!>!): Unit' is deprecated. Deprecated in Java
+
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1791216524133.json
+
+BUILD SUCCESSFUL in 39s
+23 actionable tasks: 23 executed

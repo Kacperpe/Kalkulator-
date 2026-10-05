@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="pl.kacper.kalkulator.LatexTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:09:16" hostname="runnervm8df0l" time="0.012">
+  <properties/>
+  <testcase name="modelOutputs" classname="pl.kacper.kalkulator.LatexTest" time="0.005"/>
+  <testcase name="compacting" classname="pl.kacper.kalkulator.LatexTest" time="0.001"/>
+  <testcase name="values" classname="pl.kacper.kalkulator.LatexTest" time="0.002"/>
+  <testcase name="variables" classname="pl.kacper.kalkulator.LatexTest" time="0.002"/>
+  <testcase name="unsupported" classname="pl.kacper.kalkulator.LatexTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,1 @@
+-rw-r--r-- 1 runner runner 29877174 Oct  5 16:10 Kalkulator.apk
