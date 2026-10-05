@@ -26,7 +26,7 @@ files = {n: hf_hub_download(REPO, n) for n in ["encoder_model.onnx", "decoder_mo
 
 for src, dst in [("encoder_model.onnx", "mfr_encoder.onnx"), ("decoder_model.onnx", "mfr_decoder.onnx")]:
     out = os.path.join(ASSETS, dst)
-    quantize_dynamic(files[src], out, weight_type=QuantType.QUInt8, op_types_to_quantize=["MatMul", "Gemm"])
+    quantize_dynamic(files[src], out, weight_type=QuantType.QUInt8)
     print(dst, os.path.getsize(out) // 1024, "KB")
 
 vocab = json.load(open(files["tokenizer.json"], encoding="utf-8"))["model"]["vocab"]

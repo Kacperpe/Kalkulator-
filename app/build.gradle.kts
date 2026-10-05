@@ -11,8 +11,8 @@ android {
         applicationId = "pl.kacper.kalkulator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 5
-        versionName = "1.3"
+        versionCode = 8
+        versionName = "1.4"
         ndk {
             abiFilters += listOf("arm64-v8a")
         }
@@ -31,7 +31,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
         }
     }
