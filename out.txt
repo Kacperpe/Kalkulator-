@@ -1,0 +1,166 @@
+[0;93m2026-10-05 15:40:42.779273121 [W:onnxruntime:Default, device_discovery.cc:146 GetPciBusId] Skipping pci_bus_id for PCI path at "/sys/devices/LNXSYSTM:00/LNXSYBUS:00/ACPI0004:00/MSFT1000:00/5620e0c7-8062-4dce-aeb7-520c7ef76171" because filename "5620e0c7-8062-4dce-aeb7-520c7ef76171" did not match expected pattern of [0-9a-f]+:[0-9a-f]+:[0-9a-f]+[.][0-9a-f]+[m
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+TOKENIZER keys ['version', 'truncation', 'padding', 'added_tokens', 'normalizer', 'pre_tokenizer', 'post_processor', 'decoder', 'model']
+normalizer = null
+pre_tokenizer = {"type": "ByteLevel", "add_prefix_space": false, "trim_offsets": true, "use_regex": true}
+post_processor = null
+decoder = {"type": "ByteLevel", "add_prefix_space": true, "trim_offsets": true, "use_regex": true}
+model.type BPE {'type': 'BPE', 'dropout': None, 'unk_token': None, 'continuing_subword_prefix': None, 'end_of_word_suffix': None, 'fuse_unk': False, 'byte_fallback': False}
+vocab size 1200 merges 939
+added_tokens [{"id": 0, "content": "<pad>", "single_word": false, "lstrip": false, "rstrip": false, "normalized": false, "special": true}, {"id": 1, "content": "<s>", "single_word": false, "lstrip": false, "rstrip": false, "normalized": false, "special": true}, {"id": 2, "content": "</s>", "single_word": false, "lstrip": false, "rstrip": false, "normalized": false, "special": true}, {"id": 3, "content": "<unk>", "single_word": false, "lstrip": false, "rstrip": false, "normalized": false, "special": true}, {"id": 4, "content": "<mask>", "single_word": false, "lstrip": true, "rstrip": false, "normalized": false, "special": true}]
+first 120 tokens: ['<pad>', '<s>', '</s>', '<unk>', '<mask>', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~', '¡', '¢', '£', '¤', '¥', '¦', '§', '¨', '©', 'ª', '«', '¬', '®', '¯', '°', '±', '²', '³', '´', 'µ', '¶']
+sample tokens: ['Ġa', 'ti', 'eta', 'left', 'right', 'Ġm', 'Ġj', 'Ġ\\,', 'Ġp', 'de', 'Ġs', 'Ġr', 'Ġ3', 'Ġe', 'si', 'Ġ|', 'ri', 'mu', 'Ġc', 'Ġ&', 'pha', 'alpha', 'da', 'Ġl', 'ot', 'dot', 'bda', 'ambda', 'Ġu', 'Ġf', 'Ġg', 'ĠA', 'Ġz', 'Ġ4', 'psi', 'pri', 'prime', 'Ġ\\\\', 'Ġy', 'par', 'tial', 'partial', 'to', 'phi', 'rm', 'Ġb', 'mathrm', 'na', 'lta', 'Ġq', 'su', 'amma', 'lambda', 'cal', 'ĠN', 'Ġ~', 'pi', 'sum', 'op', 'ĠT', 'nu', 'Ġ]', 'lo', 'var', 'ope', 'tor', 'rator', 'operator', 'name', 'operatorname', 'int', 'igma', 'Ġv', 'ga', 'mega', 'ĠB', 'ĠR', 'beta', 'rt', 'Ġh', 'ĠL', 've', 'Ġ[', 'Ġ/', 'lon', 'bf', 'ĠM', 'theta', 'delta', 'ĠD', 'ĠX', 'ng', 'Ġ\\;', 'psilon', 'bar', 'sigma', 'gamma', 'ngle', 'ĠC', 'ĠF', 'ĠS', 'lde', 'tilde', 'cdot', 'epsilon', 'ĠH', 'sq', 'ĠP', 'hi', 'ho', 'rho', 'ray', 'array', 'la', 'ha', 'hat', 'be', 'nd', 'sqrt', 'Ġo']
+decoder cfg: {'vocab_size': 1200, 'd_model': 256, 'decoder_layers': 6, 'max_length': 20, 'decoder_start_token_id': 2, 'eos_token_id': 2, 'pad_token_id': 1, 'bos_token_id': 0}
+encoder cfg: {'image_size': 384, 'patch_size': 16, 'hidden_size': 384, 'num_hidden_layers': 12, 'model_type': 'deit'}
+encoder_model.onnx 85446 KB
+   in  pixel_values tensor(float) ['batch_size', 'num_channels', 'height', 'width']
+   out last_hidden_state tensor(float) ['batch_size', 578, 384]
+decoder_model.onnx 29409 KB
+   in  input_ids tensor(int64) ['batch_size', 'decoder_sequence_length']
+   in  encoder_hidden_states tensor(float) ['batch_size', 'encoder_sequence_length', 384]
+   out logits tensor(float) ['batch_size', 'decoder_sequence_length', 1200]
+examples: ['ch_tra.jpg', 'en1.jpg', 'english.jpg', 'formula.jpg', 'formula2.png', 'formula3.png', 'formula4.jpg', 'formula5.jpg', 'formula6.jpg', 'general.jpg', 'hw-formula1.png', 'hw-formula2.png', 'hw-formula3.png', 'math-formula-42.png', 'mixed.jpg', 'page.png', 'page2.png', 'test-doc.pdf', 'val_0646.jpg', 'vietnamese.jpg', 'zh1.jpg', 'zh6.jpg']
+q_all sizes KB 22542 7802
+q_all ops ['Add', 'Cast', 'Concat', 'Constant', 'ConstantOfShape', 'ConvInteger', 'DequantizeLinear', 'Div', 'DynamicQuantizeLinear', 'Equal', 'Erf', 'Expand', 'Gather', 'Less', 'MatMul', 'MatMulInteger', 'Mul', 'Pow', 'Range', 'ReduceMean', 'Relu', 'Reshape', 'Shape', 'Slice', 'Softmax', 'Sqrt', 'Squeeze', 'Sub', 'Transpose', 'Unsqueeze', 'Where']
+q_matmul sizes KB 23404 9087
+q_matmul ops ['Add', 'Cast', 'Concat', 'Constant', 'ConstantOfShape', 'Conv', 'Div', 'DynamicQuantizeLinear', 'Equal', 'Erf', 'Expand', 'Gather', 'Less', 'MatMul', 'MatMulInteger', 'Mul', 'Pow', 'Range', 'ReduceMean', 'Relu', 'Reshape', 'Shape', 'Slice', 'Softmax', 'Sqrt', 'Squeeze', 'Sub', 'Transpose', 'Unsqueeze', 'Where']
+
+### imgs/r0.png (600, 180)
+  fp32        0.5s n= 20 | 2 x ^ { 3 } + x ^ { 2 } - 1 3 x + 6 = 0
+  q_all       0.4s n= 20 | 2 x ^ { 3 } + x ^ { 2 } - 1 3 x + 6 = 0
+  q_matmul    0.5s n= 20 | 2 x ^ { 3 } + x ^ { 2 } - 1 3 x + 6 = 0
+  bilinear  2 x ^ { 3 } + x ^ { 2 } - 1 3 x + 6 = 0
+  simple    2ĠxĠ^Ġ{Ġ3Ġ}Ġ+ĠxĠ^Ġ{Ġ2Ġ}Ġ-Ġ1Ġ3ĠxĠ+Ġ6Ġ=Ġ0
+  rawtokens ['2', 'Ġx', 'Ġ^', 'Ġ{', 'Ġ3', 'Ġ}', 'Ġ+', 'Ġx', 'Ġ^', 'Ġ{', 'Ġ2', 'Ġ}', 'Ġ-', 'Ġ1', 'Ġ3', 'Ġx', 'Ġ+', 'Ġ6', 'Ġ=', 'Ġ0']
+
+### imgs/r1.png (600, 180)
+  fp32        0.3s n= 19 | \frac { x ^ { 2 } + 3 x - 1 } { x + 1 }
+  q_all       0.4s n= 19 | \frac { x ^ { 2 } + 3 x - 1 } { x + 1 }
+  q_matmul    0.6s n= 19 | \frac { x ^ { 2 } + 3 x - 1 } { x + 1 }
+  bilinear  \frac { x ^ { 2 } + 3 x - 1 } { x + 1 }
+  simple    \fracĠ{ĠxĠ^Ġ{Ġ2Ġ}Ġ+Ġ3ĠxĠ-Ġ1Ġ}Ġ{ĠxĠ+Ġ1Ġ}
+  rawtokens ['\\', 'frac', 'Ġ{', 'Ġx', 'Ġ^', 'Ġ{', 'Ġ2', 'Ġ}', 'Ġ+', 'Ġ3', 'Ġx', 'Ġ-', 'Ġ1', 'Ġ}', 'Ġ{', 'Ġx', 'Ġ+', 'Ġ1', 'Ġ}']
+
+### imgs/r2.png (600, 180)
+  fp32        0.2s n= 10 | \sqrt { 5 - 2 x } = 3
+  q_all       0.3s n= 10 | \sqrt { 5 - 2 x } = 3
+  q_matmul    0.4s n= 10 | \sqrt { 5 - 2 x } = 3
+  bilinear  \sqrt { 5 - 2 x } = 3
+  simple    \sqrtĠ{Ġ5Ġ-Ġ2ĠxĠ}Ġ=Ġ3
+  rawtokens ['\\', 'sqrt', 'Ġ{', 'Ġ5', 'Ġ-', 'Ġ2', 'Ġx', 'Ġ}', 'Ġ=', 'Ġ3']
+
+### imgs/r3.png (600, 180)
+  fp32        0.3s n= 26 | \operatorname { s i n } ( 2 x + 1 ) + \operatorname { c o s } ( 1 - x )
+  q_all       0.5s n= 26 | \operatorname { s i n } ( 2 x + 1 ) + \operatorname { c o s } ( 1 - x )
+  q_matmul    0.6s n= 26 | \operatorname { s i n } ( 2 x + 1 ) + \operatorname { c o s } ( 1 - x )
+  bilinear  \operatorname { s i n } ( 2 x + 1 ) + \operatorname { c o s } ( 1 - x )
+  simple    \operatornameĠ{ĠsĠiĠnĠ}Ġ(Ġ2ĠxĠ+Ġ1Ġ)Ġ+Ġ\operatornameĠ{ĠcĠoĠsĠ}Ġ(Ġ1Ġ-ĠxĠ)
+  rawtokens ['\\', 'operatorname', 'Ġ{', 'Ġs', 'Ġi', 'Ġn', 'Ġ}', 'Ġ(', 'Ġ2', 'Ġx', 'Ġ+', 'Ġ1', 'Ġ)', 'Ġ+', 'Ġ\\', 'operatorname', 'Ġ{', 'Ġc', 'Ġo', 'Ġs', 'Ġ}', 'Ġ(', 'Ġ1', 'Ġ-', 'Ġx', 'Ġ)']
+
+### imgs/r4.png (600, 180)
+  fp32        0.3s n= 27 | x = \frac { - b \pm \sqrt { b ^ { 2 } - 4 a c } } { 2 a }
+  q_all       0.5s n= 27 | x = \frac { - b \pm \sqrt { b ^ { 2 } - 4 a c } } { 2 a }
+  q_matmul    0.6s n= 27 | x = \frac { - b \pm \sqrt { b ^ { 2 } - 4 a c } } { 2 a }
+  bilinear  x = \frac { - b \pm \sqrt { b ^ { 2 } - 4 a c } } { 2 a }
+  simple    xĠ=Ġ\fracĠ{Ġ-ĠbĠ\pmĠ\sqrtĠ{ĠbĠ^Ġ{Ġ2Ġ}Ġ-Ġ4ĠaĠcĠ}Ġ}Ġ{Ġ2ĠaĠ}
+  rawtokens ['x', 'Ġ=', 'Ġ\\', 'frac', 'Ġ{', 'Ġ-', 'Ġb', 'Ġ\\', 'pm', 'Ġ\\', 'sqrt', 'Ġ{', 'Ġb', 'Ġ^', 'Ġ{', 'Ġ2', 'Ġ}', 'Ġ-', 'Ġ4', 'Ġa', 'Ġc', 'Ġ}', 'Ġ}', 'Ġ{', 'Ġ2', 'Ġa', 'Ġ}']
+
+### imgs/r5.png (600, 180)
+  fp32        0.2s n= 17 | 3 \cdot ( 4 + 7 ) - \frac { 1 } { 2 }
+  q_all       0.4s n= 17 | 3 \cdot ( 4 + 7 ) - \frac { 1 } { 2 }
+  q_matmul    0.5s n= 17 | 3 \cdot ( 4 + 7 ) - \frac { 1 } { 2 }
+  bilinear  3 \cdot ( 4 + 7 ) - \frac { 1 } { 2 }
+  simple    3Ġ\cdotĠ(Ġ4Ġ+Ġ7Ġ)Ġ-Ġ\fracĠ{Ġ1Ġ}Ġ{Ġ2Ġ}
+  rawtokens ['3', 'Ġ\\', 'cdot', 'Ġ(', 'Ġ4', 'Ġ+', 'Ġ7', 'Ġ)', 'Ġ-', 'Ġ\\', 'frac', 'Ġ{', 'Ġ1', 'Ġ}', 'Ġ{', 'Ġ2', 'Ġ}']
+
+### imgs/r6.png (600, 180)
+  fp32        0.2s n=  7 | 2 x + 5 = 1 1
+  q_all       0.2s n=  7 | 2 x + 5 = 1 1
+  q_matmul    0.4s n=  7 | 2 x + 5 = 1 1
+  bilinear  2 x + 5 = 1 1
+  simple    2ĠxĠ+Ġ5Ġ=Ġ1Ġ1
+  rawtokens ['2', 'Ġx', 'Ġ+', 'Ġ5', 'Ġ=', 'Ġ1', 'Ġ1']
+
+### imgs/r7.png (600, 180)
+  fp32        0.2s n= 14 | \log _ { 2 } 8 + e ^ { 2 x }
+  q_all       0.3s n= 14 | \log _ { 2 } 8 + e ^ { 2 x }
+  q_matmul    0.5s n= 14 | \log _ { 2 } 8 + e ^ { 2 x }
+  bilinear  \log _ { 2 } 8 + e ^ { 2 x }
+  simple    \logĠ_Ġ{Ġ2Ġ}Ġ8Ġ+ĠeĠ^Ġ{Ġ2ĠxĠ}
+  rawtokens ['\\', 'log', 'Ġ_', 'Ġ{', 'Ġ2', 'Ġ}', 'Ġ8', 'Ġ+', 'Ġe', 'Ġ^', 'Ġ{', 'Ġ2', 'Ġx', 'Ġ}']
+
+### imgs/r8.png (600, 180)
+  fp32        0.3s n= 15 | \sqrt [ 3 ] { 2 7 } + | x - 2 |
+  q_all       0.4s n= 15 | \sqrt [ 3 ] { 2 7 } + | x - 2 |
+  q_matmul    0.5s n= 15 | \sqrt [ 3 ] { 2 7 } + | x - 2 |
+  bilinear  \sqrt [ 3 ] { 2 7 } + | x - 2 |
+  simple    \sqrtĠ[Ġ3Ġ]Ġ{Ġ2Ġ7Ġ}Ġ+Ġ|ĠxĠ-Ġ2Ġ|
+  rawtokens ['\\', 'sqrt', 'Ġ[', 'Ġ3', 'Ġ]', 'Ġ{', 'Ġ2', 'Ġ7', 'Ġ}', 'Ġ+', 'Ġ|', 'Ġx', 'Ġ-', 'Ġ2', 'Ġ|']
+
+### p2t/docs/examples/formula.jpg (752, 190)
+  fp32        1.3s n=104 | { \cal L } _ { \mathrm { e y e l i d \, } } = \sum _ { t = 1 } ^ { T } \sum _ { v = 1 } ^ { V } { \cal M } _ { v } ^ { \mathrm { ( e y e l i d \, ) } } \left( \left\| \hat { h } _ { t , v } - x _ { t , v } \right\| ^ { 2 } \right)
+  q_all       1.3s n=104 | { \cal L } _ { \mathrm { e y e l i d \, } } = \sum _ { t = 1 } ^ { T } \sum _ { v = 1 } ^ { V } { \cal M } _ { v } ^ { \mathrm { ( e y e l i d \, ) } } \left( \left\| \hat { h } _ { t , v } - x _ { t , v } \right\| ^ { 2 } \right)
+  q_matmul    1.3s n=104 | { \cal L } _ { \mathrm { e y e l i d \, } } = \sum _ { t = 1 } ^ { T } \sum _ { v = 1 } ^ { V } { \cal M } _ { v } ^ { \mathrm { ( e y e l i d \, ) } } \left( \left\| \hat { h } _ { t , v } - x _ { t , v } \right\| ^ { 2 } \right)
+  bilinear  { \cal L } _ { \mathrm { e y e l i d \, } } = \sum _ { t = 1 } ^ { T } \sum _ { v = 1 } ^ { V } { \cal M } _ { v } ^ { \mathrm { ( e y e l i d \, ) } } \left( \left\| \hat { h } _ { t , v } - x _ { t , v } \right\| ^ { 2 } \right)
+  simple    {Ġ\calĠLĠ}Ġ_Ġ{Ġ\mathrmĠ{ĠeĠyĠeĠlĠiĠdĠ\,Ġ}Ġ}Ġ=Ġ\sumĠ_Ġ{ĠtĠ=Ġ1Ġ}Ġ^Ġ{ĠTĠ}Ġ\sumĠ_Ġ{ĠvĠ=Ġ1Ġ}Ġ^Ġ{ĠVĠ}Ġ{Ġ\calĠMĠ}Ġ_Ġ{ĠvĠ}Ġ^Ġ{Ġ\mathrmĠ{Ġ(ĠeĠyĠeĠlĠiĠdĠ\,Ġ)Ġ}Ġ}Ġ\left(Ġ\left\|Ġ\hatĠ{ĠhĠ}Ġ_Ġ{ĠtĠ,ĠvĠ}Ġ-ĠxĠ_Ġ{ĠtĠ,ĠvĠ}Ġ\right\|Ġ^Ġ{Ġ2Ġ}Ġ\right)
+  rawtokens ['{', 'Ġ\\', 'cal', 'ĠL', 'Ġ}', 'Ġ_', 'Ġ{', 'Ġ\\', 'mathrm', 'Ġ{', 'Ġe', 'Ġy', 'Ġe', 'Ġl', 'Ġi', 'Ġd', 'Ġ\\,', 'Ġ}', 'Ġ}', 'Ġ=', 'Ġ\\', 'sum', 'Ġ_', 'Ġ{', 'Ġt', 'Ġ=', 'Ġ1', 'Ġ}', 'Ġ^', 'Ġ{', 'ĠT', 'Ġ}', 'Ġ\\', 'sum', 'Ġ_', 'Ġ{', 'Ġv', 'Ġ=', 'Ġ1', 'Ġ}']
+
+### p2t/docs/examples/formula2.png (507, 61)
+  fp32        1.0s n= 87 | \frac { 7 x ^ { 2 } - x + 1 } { x ^ { 3 } + 1 } - \frac { 7 x ^ { 2 } - x + 1 } { ( x + 1 ) ( x ^ { 2 } - x + 1 ) } - \frac { A } { x + 1 } + \frac { B x + C } { x ^ { 2 } - x + 1 }
+  q_all       1.2s n= 95 | { \frac { 7 x ^ { 2 } - x + 1 } { x ^ { 3 } + 1 } } - { \frac { 7 x ^ { 2 } - x + 1 } { ( x + 1 ) ( x ^ { 2 } - x + 1 ) } } - { \frac { A } { x + 1 } } + { \frac { B x + C } { x ^ { 2 } - x + 1 } }
+  q_matmul    1.0s n= 95 | { \frac { 7 x ^ { 2 } - x + 1 } { x ^ { 3 } + 1 } } - { \frac { 7 x ^ { 2 } - x + 1 } { ( x + 1 ) ( x ^ { 2 } - x + 1 ) } } - { \frac { A } { x + 1 } } + { \frac { B x + C } { x ^ { 2 } - x + 1 } }
+  bilinear  { \frac { 7 x ^ { 2 } - x + 1 } { x ^ { 3 } + 1 } } - { \frac { 7 x ^ { 2 } - x + 1 } { ( x + 1 ) ( x ^ { 2 } - x + 1 ) } } - { \frac { A } { x + 1 } } + { \frac { B x + C } { x ^ { 2 } - x + 1 } }
+  simple    \fracĠ{Ġ7ĠxĠ^Ġ{Ġ2Ġ}Ġ-ĠxĠ+Ġ1Ġ}Ġ{ĠxĠ^Ġ{Ġ3Ġ}Ġ+Ġ1Ġ}Ġ-Ġ\fracĠ{Ġ7ĠxĠ^Ġ{Ġ2Ġ}Ġ-ĠxĠ+Ġ1Ġ}Ġ{Ġ(ĠxĠ+Ġ1Ġ)Ġ(ĠxĠ^Ġ{Ġ2Ġ}Ġ-ĠxĠ+Ġ1Ġ)Ġ}Ġ-Ġ\fracĠ{ĠAĠ}Ġ{ĠxĠ+Ġ1Ġ}Ġ+Ġ\fracĠ{ĠBĠxĠ+ĠCĠ}Ġ{ĠxĠ^Ġ{Ġ2Ġ}Ġ-ĠxĠ+Ġ1Ġ}
+  rawtokens ['\\', 'frac', 'Ġ{', 'Ġ7', 'Ġx', 'Ġ^', 'Ġ{', 'Ġ2', 'Ġ}', 'Ġ-', 'Ġx', 'Ġ+', 'Ġ1', 'Ġ}', 'Ġ{', 'Ġx', 'Ġ^', 'Ġ{', 'Ġ3', 'Ġ}', 'Ġ+', 'Ġ1', 'Ġ}', 'Ġ-', 'Ġ\\', 'frac', 'Ġ{', 'Ġ7', 'Ġx', 'Ġ^', 'Ġ{', 'Ġ2', 'Ġ}', 'Ġ-', 'Ġx', 'Ġ+', 'Ġ1', 'Ġ}', 'Ġ{', 'Ġ(']
+
+### p2t/docs/examples/formula3.png (544, 64)
+  fp32        1.5s n=133 | F ( z ) \; = \; F ( 0 ) \, + \, \sum _ { m = 1 } ^ { \infty } \, \left\{ \frac { b _ { m } } { z - a _ { m } } + \frac { b _ { m } } { a _ { m } } \right\} \, + \, \sum _ { m = 1 } ^ { \infty } \, \left\{ \frac { b _ { - m } } { z - a _ { - m } } + \frac { b _ { - m } } { a _ { - m } } \right\} \, .
+  q_all       1.6s n=133 | F ( z ) \; = \; F ( 0 ) \, + \, \sum _ { m = 1 } ^ { \infty } \, \left\{ \frac { b _ { m } } { z - a _ { m } } + \frac { b _ { m } } { a _ { m } } \right\} \, + \, \sum _ { m = 1 } ^ { \infty } \, \left\{ \frac { b _ { - m } } { z - a _ { - m } } + \frac { b _ { - m } } { a _ { - m } } \right\} \, .
+  q_matmul    1.6s n=133 | F ( z ) \; = \; F ( 0 ) \, + \, \sum _ { m = 1 } ^ { \infty } \, \left\{ \frac { b _ { m } } { z - a _ { m } } + \frac { b _ { m } } { a _ { m } } \right\} \, + \, \sum _ { m = 1 } ^ { \infty } \, \left\{ \frac { b _ { - m } } { z - a _ { - m } } + \frac { b _ { - m } } { a _ { - m } } \right\} \, .
+  bilinear  F ( z ) \; = \; F ( 0 ) \, + \, \sum _ { m = 1 } ^ { \infty } \, \left\{ \frac { b _ { m } } { z - a _ { m } } + \frac { b _ { m } } { a _ { m } } \right\} \, + \, \sum _ { m = 1 } ^ { \infty } \, \left\{ \frac { b _ { - m } } { z - a _ { - m } } + \frac { b _ { - m } } { a _ { - m } } \right\} \, .
+  simple    FĠ(ĠzĠ)Ġ\;Ġ=Ġ\;ĠFĠ(Ġ0Ġ)Ġ\,Ġ+Ġ\,Ġ\sumĠ_Ġ{ĠmĠ=Ġ1Ġ}Ġ^Ġ{Ġ\inftyĠ}Ġ\,Ġ\left\{Ġ\fracĠ{ĠbĠ_Ġ{ĠmĠ}Ġ}Ġ{ĠzĠ-ĠaĠ_Ġ{ĠmĠ}Ġ}Ġ+Ġ\fracĠ{ĠbĠ_Ġ{ĠmĠ}Ġ}Ġ{ĠaĠ_Ġ{ĠmĠ}Ġ}Ġ\right\}Ġ\,Ġ+Ġ\,Ġ\sumĠ_Ġ{ĠmĠ=Ġ1Ġ}Ġ^Ġ{Ġ\inftyĠ}Ġ\,Ġ\left\{Ġ\fracĠ{ĠbĠ_Ġ{Ġ-ĠmĠ}Ġ}Ġ{ĠzĠ-ĠaĠ_Ġ{Ġ-ĠmĠ}Ġ}Ġ+Ġ\fracĠ{ĠbĠ_Ġ{Ġ-ĠmĠ}Ġ}Ġ{ĠaĠ_Ġ{Ġ-ĠmĠ}Ġ}Ġ\right\}Ġ\,Ġ.
+  rawtokens ['F', 'Ġ(', 'Ġz', 'Ġ)', 'Ġ\\;', 'Ġ=', 'Ġ\\;', 'ĠF', 'Ġ(', 'Ġ0', 'Ġ)', 'Ġ\\,', 'Ġ+', 'Ġ\\,', 'Ġ\\', 'sum', 'Ġ_', 'Ġ{', 'Ġm', 'Ġ=', 'Ġ1', 'Ġ}', 'Ġ^', 'Ġ{', 'Ġ\\', 'infty', 'Ġ}', 'Ġ\\,', 'Ġ\\', 'left', '\\{', 'Ġ\\', 'frac', 'Ġ{', 'Ġb', 'Ġ_', 'Ġ{', 'Ġm', 'Ġ}', 'Ġ}']
+
+### p2t/docs/examples/formula4.jpg (975, 126)
+  fp32        2.5s n=184 | L _ { t } = \mathbb { E } _ { \mathbf { x } _ { 0 } , \boldsymbol { \epsilon } } \Big [ \frac { ( 1 - \alpha _ { t } ) ^ { 2 } } { 2 \alpha _ { t } ( 1 - \bar { \alpha } _ { t } ) \| \mathbf { \Sigma } _ { \theta } \| _ { 2 } ^ { 2 } } \| \boldsymbol { \epsilon } _ { t } - \boldsymbol { \epsilon } _ { \theta } \big ( \sqrt { \bar { \alpha } _ { t } } \mathbf { x } _ { 0 } + \sqrt { 1 - \bar { \alpha } _ { t } } \boldsymbol { \epsilon } _ { t } , t \big ) \| ^ { 2 } \Big ]
+  q_all       2.6s n=184 | L _ { t } = \mathbb { E } _ { \mathbf { x } _ { t } , \boldsymbol { \epsilon } } \Big [ \frac { ( 1 - \alpha _ { t } ) ^ { 2 } } { 2 \alpha _ { t } ( 1 - \bar { \alpha } _ { t } ) \| \mathbf { \Sigma } _ { \theta } \| _ { 2 } ^ { 2 } } \| \boldsymbol { \epsilon } _ { t } - \boldsymbol { \epsilon } _ { \theta } \big ( \sqrt { \bar { \alpha } _ { t } } \mathbf { x } _ { 0 } + \sqrt { 1 - \bar { \alpha } _ { t } } \boldsymbol { \epsilon } _ { t } , t \big ) \| ^ { 2 } \Big ]
+  q_matmul    2.4s n=176 | L _ { t } = \mathbb { E } _ { \mathrm { x } _ { t } , \epsilon } \Big [ \frac { ( 1 - \alpha _ { t } ) ^ { 2 } } { 2 \alpha _ { t } ( 1 - \bar { \alpha } _ { t } ) \| \Sigma _ { \theta } \| _ { 2 } ^ { 2 } } \| \boldsymbol { \epsilon } _ { t } - \boldsymbol { \epsilon } _ { \theta } \big ( \sqrt { \bar { \alpha } _ { t } } \mathrm { x } _ { 0 } + \sqrt { 1 - \bar { \alpha } _ { t } } \boldsymbol { \epsilon } _ { t } , t \big ) \| ^ { 2 } \Big ]
+  bilinear  L _ { t } = \mathbb { E } _ { \textbf { x } _ { 0 } , \boldsymbol { \epsilon } } \Big [ \frac { ( 1 - \alpha _ { t } ) ^ { 2 } } { 2 \alpha _ { t } ( 1 - \bar { \alpha } _ { t } ) \| \boldsymbol { \Sigma } _ { \theta } \| _ { 2 } ^ { 2 } } \| \boldsymbol { \epsilon } _ { t } - \boldsymbol { \epsilon } _ { \theta } ( \sqrt { \bar { \alpha } _ { t } } \textbf { x } _ { 0 } + \sqrt { 1 - \bar { \alpha } _ { t } } \boldsymbol { \epsilon } _ { t } , t ) \| ^ { 2 } \Big ]
+  simple    LĠ_Ġ{ĠtĠ}Ġ=Ġ\mathbbĠ{ĠEĠ}Ġ_Ġ{Ġ\mathbfĠ{ĠxĠ}Ġ_Ġ{Ġ0Ġ}Ġ,Ġ\boldsymbolĠ{Ġ\epsilonĠ}Ġ}Ġ\BigĠ[Ġ\fracĠ{Ġ(Ġ1Ġ-Ġ\alphaĠ_Ġ{ĠtĠ}Ġ)Ġ^Ġ{Ġ2Ġ}Ġ}Ġ{Ġ2Ġ\alphaĠ_Ġ{ĠtĠ}Ġ(Ġ1Ġ-Ġ\barĠ{Ġ\alphaĠ}Ġ_Ġ{ĠtĠ}Ġ)Ġ\|Ġ\mathbfĠ{Ġ\SigmaĠ}Ġ_Ġ{Ġ\thetaĠ}Ġ\|Ġ_Ġ{Ġ2Ġ}Ġ^Ġ{Ġ2Ġ}Ġ}Ġ\|Ġ\boldsymbolĠ{Ġ\epsilonĠ}Ġ_Ġ{ĠtĠ}Ġ-Ġ\boldsymbolĠ{Ġ\epsilonĠ}Ġ_Ġ{Ġ\thetaĠ}Ġ\bigĠ(Ġ\sqrtĠ{Ġ\barĠ{Ġ\alphaĠ}Ġ_Ġ{ĠtĠ}Ġ}Ġ\mathbfĠ{ĠxĠ}Ġ_Ġ{Ġ0Ġ}Ġ+Ġ\sqrtĠ{Ġ1Ġ-Ġ\barĠ{Ġ\alphaĠ}Ġ_Ġ{ĠtĠ}Ġ}Ġ\boldsymbolĠ{Ġ\epsilonĠ}Ġ_Ġ{ĠtĠ}Ġ,ĠtĠ\bigĠ)Ġ\|Ġ^Ġ{Ġ2Ġ}Ġ\BigĠ]
+  rawtokens ['L', 'Ġ_', 'Ġ{', 'Ġt', 'Ġ}', 'Ġ=', 'Ġ\\', 'mathbb', 'Ġ{', 'ĠE', 'Ġ}', 'Ġ_', 'Ġ{', 'Ġ\\', 'mathbf', 'Ġ{', 'Ġx', 'Ġ}', 'Ġ_', 'Ġ{', 'Ġ0', 'Ġ}', 'Ġ,', 'Ġ\\', 'boldsymbol', 'Ġ{', 'Ġ\\', 'epsilon', 'Ġ}', 'Ġ}', 'Ġ\\', 'Big', 'Ġ[', 'Ġ\\', 'frac', 'Ġ{', 'Ġ(', 'Ġ1', 'Ġ-', 'Ġ\\']
+
+### p2t/docs/examples/formula5.jpg (135, 81)
+  fp32        0.5s n= 54 | \left\{ \begin{array} { l } { 2 5 a - 5 b + c = 1 } \\ { a - b + c = 1 } \\ { 9 a - 3 b + c = 0 } \\ \end{array} \right.
+  q_all       0.7s n= 54 | \left\{ \begin{array} { l } { 2 5 a - 5 b + c = 1 } \\ { a - b + c = 1 } \\ { 9 a - 3 b + c = 0 } \\ \end{array} \right.
+  q_matmul    0.7s n= 54 | \left\{ \begin{array} { l } { 2 5 a - 5 b + c = 1 } \\ { a - b + c = 1 } \\ { 9 a - 3 b + c = 0 } \\ \end{array} \right.
+  bilinear  \left\{ \begin{array} { l } { 2 5 a - 5 b + c = 1 } \\ { a - b + c = 1 } \\ { 9 a - 3 b + c = 0 } \\ \end{array} \right.
+  simple    \left\{Ġ\begin{array}Ġ{ĠlĠ}Ġ{Ġ2Ġ5ĠaĠ-Ġ5ĠbĠ+ĠcĠ=Ġ1Ġ}Ġ\\Ġ{ĠaĠ-ĠbĠ+ĠcĠ=Ġ1Ġ}Ġ\\Ġ{Ġ9ĠaĠ-Ġ3ĠbĠ+ĠcĠ=Ġ0Ġ}Ġ\\Ġ\end{array}Ġ\right.
+  rawtokens ['\\', 'left', '\\{', 'Ġ\\', 'begin', '{', 'array', '}', 'Ġ{', 'Ġl', 'Ġ}', 'Ġ{', 'Ġ2', 'Ġ5', 'Ġa', 'Ġ-', 'Ġ5', 'Ġb', 'Ġ+', 'Ġc', 'Ġ=', 'Ġ1', 'Ġ}', 'Ġ\\\\', 'Ġ{', 'Ġa', 'Ġ-', 'Ġb', 'Ġ+', 'Ġc', 'Ġ=', 'Ġ1', 'Ġ}', 'Ġ\\\\', 'Ġ{', 'Ġ9', 'Ġa', 'Ġ-', 'Ġ3', 'Ġb']
+
+### p2t/docs/examples/formula6.jpg (519, 437)
+  fp32        1.5s n=124 | \left[ \begin{matrix} { 0 } & { 1 } & { 0 } & { 0 } \\ { 0 } & { 0 } & { \frac { m ^ { 2 } g l ^ { 2 } } { M m l ^ { 2 } } } & { 0 } \\ { 0 } & { 0 } & { 0 } & { 1 } \\ { 0 } & { 0 } & { \frac { - m g l ( M + m ) } { M m l ^ { 2 } } } & { 0 } \\ \end{matrix} \right]
+  q_all       1.5s n=124 | \left[ \begin{matrix} { 0 } & { 1 } & { 0 } & { 0 } \\ { 0 } & { 0 } & { \frac { m ^ { 2 } g l ^ { 2 } } { M m l ^ { 2 } } } & { 0 } \\ { 0 } & { 0 } & { 0 } & { 1 } \\ { 0 } & { 0 } & { \frac { - m g l ( M + m ) } { M m l ^ { 2 } } } & { 0 } \\ \end{matrix} \right]
+  q_matmul    1.4s n=124 | \left[ \begin{matrix} { 0 } & { 1 } & { 0 } & { 0 } \\ { 0 } & { 0 } & { \frac { m ^ { 2 } g l ^ { 2 } } { M m l ^ { 2 } } } & { 0 } \\ { 0 } & { 0 } & { 0 } & { 1 } \\ { 0 } & { 0 } & { \frac { - m g l ( M + m ) } { M m l ^ { 2 } } } & { 0 } \\ \end{matrix} \right]
+  bilinear  \left[ \begin{matrix} { 0 } & { 1 } & { 0 } & { 0 } \\ { 0 } & { 0 } & { \frac { m ^ { 2 } g l ^ { 2 } } { M m l ^ { 2 } } } & { 0 } \\ { 0 } & { 0 } & { 0 } & { 1 } \\ { 0 } & { 0 } & { \frac { - m g l ( M + m ) } { M m l ^ { 2 } } } & { 0 } \\ \end{matrix} \right]
+  simple    \left[Ġ\begin{matrix}Ġ{Ġ0Ġ}Ġ&Ġ{Ġ1Ġ}Ġ&Ġ{Ġ0Ġ}Ġ&Ġ{Ġ0Ġ}Ġ\\Ġ{Ġ0Ġ}Ġ&Ġ{Ġ0Ġ}Ġ&Ġ{Ġ\fracĠ{ĠmĠ^Ġ{Ġ2Ġ}ĠgĠlĠ^Ġ{Ġ2Ġ}Ġ}Ġ{ĠMĠmĠlĠ^Ġ{Ġ2Ġ}Ġ}Ġ}Ġ&Ġ{Ġ0Ġ}Ġ\\Ġ{Ġ0Ġ}Ġ&Ġ{Ġ0Ġ}Ġ&Ġ{Ġ0Ġ}Ġ&Ġ{Ġ1Ġ}Ġ\\Ġ{Ġ0Ġ}Ġ&Ġ{Ġ0Ġ}Ġ&Ġ{Ġ\fracĠ{Ġ-ĠmĠgĠlĠ(ĠMĠ+ĠmĠ)Ġ}Ġ{ĠMĠmĠlĠ^Ġ{Ġ2Ġ}Ġ}Ġ}Ġ&Ġ{Ġ0Ġ}Ġ\\Ġ\end{matrix}Ġ\right]
+  rawtokens ['\\', 'left', '[', 'Ġ\\', 'begin', '{', 'matrix', '}', 'Ġ{', 'Ġ0', 'Ġ}', 'Ġ&', 'Ġ{', 'Ġ1', 'Ġ}', 'Ġ&', 'Ġ{', 'Ġ0', 'Ġ}', 'Ġ&', 'Ġ{', 'Ġ0', 'Ġ}', 'Ġ\\\\', 'Ġ{', 'Ġ0', 'Ġ}', 'Ġ&', 'Ġ{', 'Ġ0', 'Ġ}', 'Ġ&', 'Ġ{', 'Ġ\\', 'frac', 'Ġ{', 'Ġm', 'Ġ^', 'Ġ{', 'Ġ2']
+
+### p2t/docs/examples/hw-formula1.png (187, 89)
+  fp32        0.4s n= 33 | S _ { 2 } - S _ { 1 } = \int _ { t _ { 1 } } ^ { t _ { 2 } } v d t
+  q_all       0.5s n= 33 | S _ { 2 } - S _ { 1 } = \int _ { t _ { 1 } } ^ { t _ { 2 } } v d t
+  q_matmul    0.6s n= 33 | S _ { 2 } - S _ { 1 } = \int _ { t _ { 1 } } ^ { t _ { 2 } } v d t
+  bilinear  S _ { 2 } - S _ { 1 } = \int _ { t _ { 1 } } ^ { t _ { 2 } } v d t
+  simple    SĠ_Ġ{Ġ2Ġ}Ġ-ĠSĠ_Ġ{Ġ1Ġ}Ġ=Ġ\intĠ_Ġ{ĠtĠ_Ġ{Ġ1Ġ}Ġ}Ġ^Ġ{ĠtĠ_Ġ{Ġ2Ġ}Ġ}ĠvĠdĠt
+  rawtokens ['S', 'Ġ_', 'Ġ{', 'Ġ2', 'Ġ}', 'Ġ-', 'ĠS', 'Ġ_', 'Ġ{', 'Ġ1', 'Ġ}', 'Ġ=', 'Ġ\\', 'int', 'Ġ_', 'Ġ{', 'Ġt', 'Ġ_', 'Ġ{', 'Ġ1', 'Ġ}', 'Ġ}', 'Ġ^', 'Ġ{', 'Ġt', 'Ġ_', 'Ġ{', 'Ġ2', 'Ġ}', 'Ġ}', 'Ġv', 'Ġd', 'Ġt']
+
+### p2t/docs/examples/hw-formula2.png (502, 108)
+  fp32        0.7s n= 72 | \int _ { - \infty } ^ { + \infty } e ^ { - t ( s + \frac { i x _ { j } } { 2 t } ) ^ { 2 } } d s = \int _ { - \infty } ^ { + \infty } e ^ { - t s ^ { 2 } } d s
+  q_all       0.9s n= 72 | \int _ { - \infty } ^ { + \infty } e ^ { - t ( s + \frac { i x _ { j } } { 2 t } ) ^ { 2 } } d s = \int _ { - \infty } ^ { + \infty } e ^ { - t s ^ { 2 } } d s
+  q_matmul    0.8s n= 72 | \int _ { - \infty } ^ { + \infty } e ^ { - t ( s + \frac { i x _ { j } } { 2 t } ) ^ { 2 } } d s = \int _ { - \infty } ^ { + \infty } e ^ { - t s ^ { 2 } } d s
+  bilinear  \int _ { - \infty } ^ { + \infty } e ^ { - t ( s + \frac { i x _ { j } } { 2 t } ) ^ { 2 } } d s = \int _ { - \infty } ^ { + \infty } e ^ { - t s ^ { 2 } } d s
+  simple    \intĠ_Ġ{Ġ-Ġ\inftyĠ}Ġ^Ġ{Ġ+Ġ\inftyĠ}ĠeĠ^Ġ{Ġ-ĠtĠ(ĠsĠ+Ġ\fracĠ{ĠiĠxĠ_Ġ{ĠjĠ}Ġ}Ġ{Ġ2ĠtĠ}Ġ)Ġ^Ġ{Ġ2Ġ}Ġ}ĠdĠsĠ=Ġ\intĠ_Ġ{Ġ-Ġ\inftyĠ}Ġ^Ġ{Ġ+Ġ\inftyĠ}ĠeĠ^Ġ{Ġ-ĠtĠsĠ^Ġ{Ġ2Ġ}Ġ}ĠdĠs
+  rawtokens ['\\', 'int', 'Ġ_', 'Ġ{', 'Ġ-', 'Ġ\\', 'infty', 'Ġ}', 'Ġ^', 'Ġ{', 'Ġ+', 'Ġ\\', 'infty', 'Ġ}', 'Ġe', 'Ġ^', 'Ġ{', 'Ġ-', 'Ġt', 'Ġ(', 'Ġs', 'Ġ+', 'Ġ\\', 'frac', 'Ġ{', 'Ġi', 'Ġx', 'Ġ_', 'Ġ{', 'Ġj', 'Ġ}', 'Ġ}', 'Ġ{', 'Ġ2', 'Ġt', 'Ġ}', 'Ġ)', 'Ġ^', 'Ġ{', 'Ġ2']
