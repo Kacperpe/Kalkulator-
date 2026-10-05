@@ -36,8 +36,11 @@ android {
         }
     }
 
-    androidResources {
-        noCompress += listOf("onnx")
+    // Kompresja bibliotek natywnych zmniejsza plik APK (model i tak jest kopiowany do pamięci aplikacji).
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 
     compileOptions {
