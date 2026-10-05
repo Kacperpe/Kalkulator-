@@ -9,6 +9,12 @@ tryby DEG/RAD/GRAD, S⇔D (ułamek ↔ dziesiętna), ENG, historia, kopiuj/wklej
 Żółte napisy nad klawiszami to funkcje po **SHIFT**, fioletowe po **ALPHA**.
 Klawisze bez implementacji (MATRIX, STAT, CMPLX, SOLVE itd.) pokazują „Funkcja niedostępna".
 
+## Narzędzia (przycisk ≡)
+
+Wykres funkcji (przeciąganie i uszczypnięcie), rozwiązywanie równań z x (także SHIFT+CALC), własne funkcje f, g, h,
+teoria liczb (rozkład na czynniki, dzielniki, systemy liczbowe, zapis rzymski), postacie liczby (ułamek, okres, %, DMS),
+statystyka jedno- i dwuwymiarowa z regresją liniową, macierze (wyznacznik, rząd, transpozycja, odwrotność, działania), skórki.
+
 ## Pobranie APK
 
 Każdy push na `main` uruchamia GitHub Actions, które testuje silnik obliczeń, buduje APK

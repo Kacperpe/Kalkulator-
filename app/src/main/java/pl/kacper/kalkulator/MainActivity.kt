@@ -18,6 +18,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
+import android.text.InputType
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -30,6 +31,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
+import android.widget.ScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
 import kotlin.math.abs
@@ -121,6 +124,12 @@ class MainActivity : Activity() {
     private val vars = HashMap<Char, Double>()
     private val history = ArrayList<Hist>()
     private var histPos = -1
+    private val fnNames = arrayOf("f", "g", "h")
+    private val fnDisp = arrayOf("", "", "")
+    private val fnCode = arrayOf("", "", "")
+    private var statsText = ""
+    private var matA = ""
+    private var matB = ""
 
     // ---- widoki ----
     private lateinit var statusView: TextView
@@ -129,19 +138,50 @@ class MainActivity : Activity() {
     private lateinit var angleBtn: Button
     private lateinit var lastBtn: Button
 
-    // ---- kolory i style ----
-    private val cBg = 0xFF15161A.toInt()
-    private val cText = 0xFFE8E8EC.toInt()
-    private val cShift = 0xFFFFC629.toInt()
-    private val cAlpha = 0xFFA08CFF.toInt()
-    private val cDim = 0xFF30333A.toInt()
-
-    private val fnStyle = Style(0xFF4B4A51.toInt(), 0xFF38373D.toInt(), 0xFF5C5B63.toInt(), 14, cText, 15f, 95f)
-    private val numStyle = Style(0xFF2C2C31.toInt(), 0xFF1F1F23.toInt(), 0xFF3B3B42.toInt(), 16, Color.WHITE, 27f, 110f)
+    // ---- kolory i style (ustawiane przez applyTheme) ----
+    private var theme = 0
+    private var cBg = 0
+    private var cDot = 0
+    private var cText = 0
+    private var cShift = 0
+    private var cAlpha = 0
+    private var cDim = 0
+    private lateinit var fnStyle: Style
+    private lateinit var numStyle: Style
+    private lateinit var pillStyle: Style
     private val orangeStyle = Style(0xFFF0A068.toInt(), 0xFFE08850.toInt(), 0xFFF5B98C.toInt(), 16, Color.BLACK, 22f, 110f)
     private val shiftStyle = Style(0xFFFFD04A.toInt(), 0xFFF5B81F.toInt(), 0xFFFFE08A.toInt(), 14, Color.BLACK, 15f, 95f)
     private val alphaStyle = Style(0xFF8B7BD6.toInt(), 0xFF6D5DBB.toInt(), 0xFFA596E6.toInt(), 14, Color.WHITE, 15f, 95f)
-    private val pillStyle = Style(0xFF2A2B30.toInt(), 0xFF1E1F23.toInt(), 0xFF4A4B52.toInt(), 22, cText, 13f, 1f)
+    private val themeNames = arrayOf<CharSequence>("Ciemna", "Jasna", "Granatowa")
+
+    private fun col(v: Long): Int = v.toInt()
+
+    private fun applyTheme(i: Int) {
+        theme = i.coerceIn(0, 2)
+        when (theme) {
+            1 -> {
+                cBg = col(0xFFE9EAEE); cDot = col(0xFFD3D5DC); cText = col(0xFF1B1C20)
+                cShift = col(0xFFA86F00); cAlpha = col(0xFF5B45C9); cDim = col(0xFFC3C5CD)
+                fnStyle = Style(col(0xFFFFFFFF), col(0xFFE2E3E9), col(0xFFC4C6CE), 14, cText, 15f, 95f)
+                numStyle = Style(col(0xFF3C3D44), col(0xFF2A2B30), col(0xFF4C4D55), 16, Color.WHITE, 27f, 110f)
+                pillStyle = Style(col(0xFFFFFFFF), col(0xFFE2E3E9), col(0xFFC4C6CE), 22, cText, 13f, 1f)
+            }
+            2 -> {
+                cBg = col(0xFF0F1B2D); cDot = col(0xFF1B2C46); cText = col(0xFFE8EEF8)
+                cShift = col(0xFFFFC629); cAlpha = col(0xFF9DB4FF); cDim = col(0xFF2A3B57)
+                fnStyle = Style(col(0xFF2F4466), col(0xFF22344F), col(0xFF3F5A85), 14, cText, 15f, 95f)
+                numStyle = Style(col(0xFF18263C), col(0xFF101B2D), col(0xFF2A3D5C), 16, Color.WHITE, 27f, 110f)
+                pillStyle = Style(col(0xFF1A2940), col(0xFF121E31), col(0xFF34496B), 22, cText, 13f, 1f)
+            }
+            else -> {
+                cBg = col(0xFF15161A); cDot = col(0xFF22242A); cText = col(0xFFE8E8EC)
+                cShift = col(0xFFFFC629); cAlpha = col(0xFFA08CFF); cDim = col(0xFF30333A)
+                fnStyle = Style(col(0xFF4B4A51), col(0xFF38373D), col(0xFF5C5B63), 14, cText, 15f, 95f)
+                numStyle = Style(col(0xFF2C2C31), col(0xFF1F1F23), col(0xFF3B3B42), 16, Color.WHITE, 27f, 110f)
+                pillStyle = Style(col(0xFF2A2B30), col(0xFF1E1F23), col(0xFF4A4B52), 22, cText, 13f, 1f)
+            }
+        }
+    }
 
     private val contOps = setOf("+", "−", "×", "÷", "/", "!", "%", "P", "C", "^", "^2", "^3", "^(-1)", "~", "mod")
 
@@ -173,7 +213,7 @@ class MainActivity : Activity() {
         val c = Canvas(bmp)
         c.drawColor(cBg)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        paint.color = 0xFF22242A.toInt()
+        paint.color = cDot
         c.drawCircle(n / 2f, n / 2f, dp(1) * 0.6f, paint)
         val bd = BitmapDrawable(resources, bmp)
         bd.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
@@ -277,9 +317,7 @@ class MainActivity : Activity() {
     private fun compute(): Double? {
         if (tokens.isEmpty()) return null
         return try {
-            val all = HashMap<Char, Double>(vars)
-            all['p'] = preAns
-            Evaluator(angle, lastAns, all).evaluate(tokens.joinToString("") { it.c })
+            Evaluator(angle, lastAns, allVars(), fnBodies()).evaluate(currentCode())
         } catch (e: CalcException) {
             message = e.message
             isError = true
@@ -303,7 +341,7 @@ class MainActivity : Activity() {
         lastResult = v
         justEvaluated = true
         history.add(Hist(ArrayList(tokens), v))
-        if (history.size > 50) history.removeAt(0)
+        if (history.size > 5000) history.removeAt(0)
         histPos = -1
         return v
     }
@@ -502,11 +540,33 @@ class MainActivity : Activity() {
         return g
     }
 
-    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val prefs = getPreferences(Context.MODE_PRIVATE)
+        for (i in 0..2) {
+            fnDisp[i] = prefs.getString("fn" + i + "d", "") ?: ""
+            fnCode[i] = prefs.getString("fn" + i + "c", "") ?: ""
+        }
+        applyTheme(prefs.getInt("theme", 0))
+        buildUi()
+    }
+
+    private fun savePrefs() {
+        val e = getPreferences(Context.MODE_PRIVATE).edit()
+        e.putInt("theme", theme)
+        for (i in 0..2) {
+            e.putString("fn" + i + "d", fnDisp[i])
+            e.putString("fn" + i + "c", fnCode[i])
+        }
+        e.apply()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun buildUi() {
         window.statusBarColor = cBg
         window.navigationBarColor = cBg
+        window.decorView.systemUiVisibility =
+            if (theme == 1) (View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR) else 0
 
         val root = LinearLayout(this)
         root.orientation = LinearLayout.VERTICAL
@@ -564,7 +624,7 @@ class MainActivity : Activity() {
         // pasek pigułek
         val spacer = View(this)
         spacer.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1.6f)
-        val pillHist = key("≡", st = pillStyle, labeled = false) { showHistory() }
+        val pillHist = key("≡", st = pillStyle, labeled = false) { showMenu() }
         val pillCopy = weighted(key("COPY", st = pillStyle, labeled = false) { copyResult() }, 1.3f)
         val pillPaste = weighted(key("PASTE", st = pillStyle, labeled = false) { paste() }, 1.3f)
         val pillAngle = key("DEG", st = pillStyle, labeled = false) { cycleAngle() }
@@ -586,7 +646,7 @@ class MainActivity : Activity() {
             ),
             row(
                 150f,
-                key("CALC", "SOLVE", "=") { na() },
+                key("CALC", "SOLVE", "=", s = { solveDialog() }, a = { ins("=") }) { na() },
                 key(
                     "∫dx", "d/dx", ";",
                     s = { ins("d/dx(", "diff(") },
@@ -643,7 +703,7 @@ class MainActivity : Activity() {
             row(
                 150f,
                 key("(-)", "∠", variable = 'a') { ins("-") },
-                key("°'\"", "FACT", variable = 'b') { na() },
+                key("°'\"", "FACT", variable = 'b', s = { numberTheory() }) { na() },
                 key("hyp", "|x|", variable = 'c', s = { ins("abs(") }) { hyp = !hyp },
                 key("Sin", "Sin^{-1}", variable = 'd', s = { trig("sin", true) }) { trig("sin", false) },
                 key("Cos", "Cos^{-1}", s = { trig("cos", true) }) { trig("cos", false) },
@@ -683,9 +743,9 @@ class MainActivity : Activity() {
         root.addView(
             row(
                 165f,
-                num("4", "MATRIX"),
+                num("4", "MATRIX", s = { matrixDialog() }),
                 num("5", "VECTOR"),
-                num("6", "FUNC HELP"),
+                num("6", "FUNC HELP", s = { functionsDialog() }),
                 num("×", "nPr", "GCD", s = { ins("P") }, a = { ins("gcd(") }),
                 num("÷", "nCr", "LCM", s = { ins("C") }, a = { ins("lcm(") })
             )
@@ -693,7 +753,7 @@ class MainActivity : Activity() {
         root.addView(
             row(
                 165f,
-                num("1", "STAT"),
+                num("1", "STAT", s = { statsDialog() }),
                 num("2", "CMPLX"),
                 num("3", "DISTR"),
                 num("+", "Pol", "Ceil", a = { ins("ceil(") }),
@@ -712,7 +772,238 @@ class MainActivity : Activity() {
         )
 
         setContentView(root)
+        root.requestApplyInsets()
         refresh()
+    }
+
+    // ---- narzędzia ----
+    private fun allVars(): HashMap<Char, Double> {
+        val all = HashMap<Char, Double>(vars)
+        all['p'] = preAns
+        return all
+    }
+
+    private fun fnBodies(): Map<String, String> {
+        val m = HashMap<String, String>()
+        for (i in 0..2) if (fnCode[i].isNotEmpty()) m["u" + (i + 1)] = fnCode[i]
+        return m
+    }
+
+    private fun balance(code: String): String {
+        val open = code.count { it == '(' } - code.count { it == ')' }
+        return if (open > 0) code + ")".repeat(open) else code
+    }
+
+    private fun codeOf(list: List<Tok>): String = balance(list.joinToString("") { it.c })
+    private fun currentCode(): String = tokens.joinToString("") { it.c }
+    private fun currentText(): String = tokens.joinToString("") { it.d }
+
+    private fun exprFn(code: String): (Double) -> Double {
+        val base = allVars()
+        val bodies = fnBodies()
+        val mode = angle
+        val a = lastAns
+        return { x ->
+            val v = HashMap<Char, Double>(base)
+            v['x'] = x
+            Evaluator(mode, a, v, bodies).evaluate(code)
+        }
+    }
+
+    private fun textDialog(title: String, body: String) {
+        val tv = TextView(this)
+        tv.text = body
+        tv.typeface = Typeface.MONOSPACE
+        tv.textSize = 14f
+        tv.setTextIsSelectable(true)
+        tv.setPadding(dp(22), dp(12), dp(22), dp(8))
+        val sv = ScrollView(this)
+        sv.addView(tv)
+        AlertDialog.Builder(this).setTitle(title).setView(sv).setPositiveButton("OK", null).show()
+    }
+
+    private fun showMenu() {
+        val items = arrayOf<CharSequence>(
+            "Historia", "Wykres funkcji", "Rozwiąż równanie", "Własne funkcje f, g, h",
+            "Teoria liczb", "Postacie liczby", "Statystyka", "Macierze", "Skórka"
+        )
+        AlertDialog.Builder(this).setTitle("Narzędzia").setItems(items) { _, i ->
+            message = null
+            isError = false
+            when (i) {
+                0 -> showHistory()
+                1 -> graphDialog()
+                2 -> solveDialog()
+                3 -> functionsDialog()
+                4 -> numberTheory()
+                5 -> numberForms()
+                6 -> statsDialog()
+                7 -> matrixDialog()
+                else -> themeDialog()
+            }
+            refresh()
+        }.show()
+    }
+
+    private fun graphDialog() {
+        val list = ArrayList<(Double) -> Double>()
+        val names = ArrayList<String>()
+        if (tokens.isNotEmpty() && tokens.none { it.c == "=" }) {
+            list.add(exprFn(codeOf(tokens)))
+            names.add(currentText())
+        } else {
+            for (i in 0..2) if (fnCode[i].isNotEmpty()) {
+                list.add(exprFn(fnCode[i]))
+                names.add(fnNames[i] + "(x)")
+            }
+        }
+        if (list.isEmpty()) {
+            note("Wpisz wzór z x (ALPHA, potem klawisz ')')")
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle("y = " + names.joinToString(", ") + "   [" + angle.name + "]")
+            .setView(GraphView(this, list))
+            .setPositiveButton("Zamknij", null)
+            .show()
+    }
+
+    private fun solveDialog() {
+        if (tokens.isEmpty()) {
+            note("Wpisz równanie z x")
+            return
+        }
+        val eq = tokens.indexOfFirst { it.c == "=" }
+        val code = if (eq < 0) codeOf(tokens)
+        else "(" + codeOf(tokens.subList(0, eq)) + ")-(" + codeOf(tokens.subList(eq + 1, tokens.size)) + ")"
+        val f = exprFn(code)
+        try {
+            f(0.1234567)
+        } catch (e: CalcException) {
+            if (e.message == "Błąd składni") {
+                message = e.message
+                isError = true
+                return
+            }
+        } catch (e: Exception) {
+            message = "Błąd składni"
+            isError = true
+            return
+        }
+        val roots = MathTools.solve(f, -100.0, 100.0)
+        val sb = StringBuilder()
+        sb.append(currentText()).append(if (eq < 0) " = 0" else "").append("\n\n")
+        if (roots.isEmpty()) {
+            sb.append("Brak pierwiastków rzeczywistych\nw przedziale [-100, 100].")
+        } else {
+            for ((i, r) in roots.take(50).withIndex()) {
+                sb.append("x").append(if (roots.size > 1) (i + 1).toString() else "").append(" = ").append(Formatter.format(r))
+                val fr = Formatter.toFraction(r)
+                if (fr != null) sb.append("   (").append(fr).append(")")
+                sb.append("\n")
+            }
+            sb.append("\nMetoda numeryczna, przedział [-100, 100].")
+        }
+        textDialog("Rozwiązanie równania", sb.toString())
+    }
+
+    private fun functionsDialog() {
+        val items: Array<CharSequence> = Array(6) { i ->
+            if (i < 3) "Wstaw " + fnNames[i] + "(x) = " + (if (fnDisp[i].isEmpty()) "—" else fnDisp[i])
+            else "Zapisz bieżące wyrażenie jako " + fnNames[i - 3] + "(x)"
+        }
+        AlertDialog.Builder(this).setTitle("Własne funkcje").setItems(items) { _, i ->
+            message = null
+            isError = false
+            if (i < 3) {
+                if (fnCode[i].isEmpty()) note("Najpierw zdefiniuj " + fnNames[i] + "(x)")
+                else ins(fnNames[i] + "(", "u" + (i + 1) + "(")
+            } else {
+                val k = i - 3
+                if (tokens.isEmpty() || tokens.any { it.c == "=" }) {
+                    note("Wpisz wzór z x i spróbuj ponownie")
+                } else {
+                    fnDisp[k] = currentText()
+                    fnCode[k] = codeOf(tokens)
+                    savePrefs()
+                    note("Zapisano " + fnNames[k] + "(x)")
+                }
+            }
+            refresh()
+        }.show()
+    }
+
+    private fun resultOrNote(): Double? {
+        val r = calculate()
+        if (r == null && !isError) note("Najpierw wpisz liczbę")
+        return r
+    }
+
+    private fun numberTheory() {
+        val r = resultOrNote() ?: return
+        if (r != Math.floor(r) || Math.abs(r) < 1 || Math.abs(r) > 1e13) {
+            note("Potrzebna liczba całkowita od 1 do 10^13")
+            return
+        }
+        val n = Math.abs(r).toLong()
+        textDialog("Teoria liczb: " + n, MathTools.numberInfo(n))
+    }
+
+    private fun numberForms() {
+        val r = resultOrNote() ?: return
+        textDialog("Postacie liczby", MathTools.forms(r))
+    }
+
+    private fun inputBox(vararg fields: EditText): LinearLayout {
+        val box = LinearLayout(this)
+        box.orientation = LinearLayout.VERTICAL
+        box.setPadding(dp(20), dp(8), dp(20), 0)
+        for (f in fields) {
+            f.typeface = Typeface.MONOSPACE
+            f.gravity = Gravity.TOP or Gravity.START
+            f.minLines = 3
+            f.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            box.addView(f)
+        }
+        return box
+    }
+
+    private fun statsDialog() {
+        val input = EditText(this)
+        input.hint = "Liczby oddzielone spacją, np. 2 4 4 5 7\nRegresja: pary x;y, np. 1;3 2;5 3;7"
+        input.setText(statsText)
+        AlertDialog.Builder(this).setTitle("Statystyka").setView(inputBox(input))
+            .setPositiveButton("Oblicz") { _, _ ->
+                statsText = input.text.toString()
+                textDialog("Statystyka", MathTools.statsReport(statsText))
+            }
+            .setNegativeButton("Anuluj", null)
+            .show()
+    }
+
+    private fun matrixDialog() {
+        val a = EditText(this)
+        a.hint = "Macierz A: wiersze w nowych liniach,\nliczby oddzielone spacją"
+        a.setText(matA)
+        val b = EditText(this)
+        b.hint = "Macierz B (opcjonalnie)"
+        b.setText(matB)
+        AlertDialog.Builder(this).setTitle("Macierze").setView(inputBox(a, b))
+            .setPositiveButton("Oblicz") { _, _ ->
+                matA = a.text.toString()
+                matB = b.text.toString()
+                textDialog("Macierze", MathTools.matrixReport(matA, matB))
+            }
+            .setNegativeButton("Anuluj", null)
+            .show()
+    }
+
+    private fun themeDialog() {
+        AlertDialog.Builder(this).setTitle("Skórka").setItems(themeNames) { _, i ->
+            applyTheme(i)
+            savePrefs()
+            buildUi()
+        }.show()
     }
 
     // ---- odświeżanie ekranu ----

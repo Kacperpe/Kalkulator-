@@ -34,7 +34,9 @@ class CalcException(message: String) : Exception(message)
 class Evaluator(
     private val mode: AngleMode = AngleMode.DEG,
     private val ans: Double = 0.0,
-    private val vars: Map<Char, Double> = emptyMap()
+    private val vars: Map<Char, Double> = emptyMap(),
+    private val fns: Map<String, String> = emptyMap(),
+    private val depth: Int = 0
 ) {
     private var s = ""
     private var p = 0
@@ -42,10 +44,11 @@ class Evaluator(
     private val names = listOf(
         "asinh", "acosh", "atanh", "ranint", "floor", "sinh", "cosh", "tanh",
         "asin", "acos", "atan", "acot", "sqrt", "cbrt", "ceil", "logb", "diff", "prod", "rand",
-        "sin", "cos", "tan", "cot", "log", "abs", "gcd", "lcm", "int", "sum", "ln", "pi", "e"
+        "sin", "cos", "tan", "cot", "log", "abs", "gcd", "lcm", "int", "sum", "ln", "pi", "e", "u1", "u2", "u3"
     ).sortedByDescending { it.length }
 
     private val lazyNames = setOf("int", "diff", "sum", "prod")
+    private val userNames = setOf("u1", "u2", "u3")
     private val twoArgNames = setOf("logb", "gcd", "lcm", "ranint")
 
     fun evaluate(expr: String): Double {
@@ -230,6 +233,13 @@ class Evaluator(
         }
         if (peek() != '(') syntaxError()
         p++
+        if (name in userNames) {
+            val body = fns[name] ?: syntaxError()
+            if (depth > 30) mathError()
+            val arg = parseExpr()
+            closeParen()
+            return Evaluator(mode, ans, vars + ('x' to arg), fns, depth + 1).evaluate(body)
+        }
         if (name in lazyNames) return parseLazy(name)
         val x = parseExpr()
         val result = if (name in twoArgNames) {
@@ -265,7 +275,7 @@ class Evaluator(
             b = parseExpr()
         }
         closeParen()
-        val f = { x: Double -> Evaluator(mode, ans, vars + ('x' to x)).evaluate(body) }
+        val f = { x: Double -> Evaluator(mode, ans, vars + ('x' to x), fns, depth).evaluate(body) }
         return when (name) {
             "int" -> simpson(f, a, b)
             "diff" -> derivative(f, a)
