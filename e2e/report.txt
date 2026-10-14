@@ -1,0 +1,11 @@
+[e2e] klawisze: 92
+[e2e] media id: 18
+[e2e] udostępnienie z MediaStore bez dostępu - plik w katalogu aplikacji
+[e2e] udostępnienie z powłoki nie dało dostępu do pliku - przez galerię
+[e2e] BRAK NA EKRANIE: Select
+[e2e] BRAK NA EKRANIE: Select
+[e2e] BRAK NA EKRANIE: Rozpoznaj
+[e2e] nie ma przycisku Rozpoznaj
+[e2e] ROZPOZNANIE NIE SKOŃCZYŁO SIĘ W 240 s
+[e2e] BRAK NA EKRANIE: Wstaw
+[e2e] koniec

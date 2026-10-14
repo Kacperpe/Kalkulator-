@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="pl.kacper.kalkulator.MathToolsTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-14T15:33:39" hostname="runnervmmprz5" time="0.103">
+  <properties/>
+  <testcase name="solving" classname="pl.kacper.kalkulator.MathToolsTest" time="0.09"/>
+  <testcase name="statistics" classname="pl.kacper.kalkulator.MathToolsTest" time="0.003"/>
+  <testcase name="matrices" classname="pl.kacper.kalkulator.MathToolsTest" time="0.004"/>
+  <testcase name="numberForms" classname="pl.kacper.kalkulator.MathToolsTest" time="0.004"/>
+  <testcase name="numberTheory" classname="pl.kacper.kalkulator.MathToolsTest" time="0.001"/>
+  <testcase name="userFunctions" classname="pl.kacper.kalkulator.MathToolsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

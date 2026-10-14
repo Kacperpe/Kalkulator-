@@ -1,0 +1,18 @@
+Large files	182 325
+This week	522 325
+BROWSE FILES IN OTHER APPS	250 457
+Drive	269 678
+Photos	809 678
+RECENT IMAGES	474 799
+List view	948 799
+Show roots	99 171
+Recent	306 171
+Search	860 171
+More options	992 171
+No items	540 1737
+Open from	199 149
+Recent	462 313
+Downloads	462 467
+sdk_gphone_x86_64	462 690
+Drive	396 924
+Photos	396 1100
