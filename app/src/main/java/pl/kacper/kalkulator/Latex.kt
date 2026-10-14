@@ -183,9 +183,15 @@ object Latex {
                     val a = arg()
                     val b = arg()
                     if (a.isEmpty() || b.isEmpty()) fail("Niepełny ułamek")
-                    add(out, "("); add(out, "("); out.addAll(a); add(out, ")")
-                    add(out, "÷")
-                    add(out, "("); out.addAll(b); add(out, ")"); add(out, ")")
+                    // Zapis „licznik / mianownik" (kreska ułamkowa), który wyświetlacz pokazuje piętrowo.
+                    // Nawias zewnętrzny tylko po dzieleniu (6 ÷ ½ ≠ (6 ÷ 1) ÷ 2).
+                    val outer = out.isNotEmpty() && (out.last().c == "÷" || out.last().c == "/")
+                    if (outer) add(out, "(")
+                    val prevDigit = out.isNotEmpty() && out.last().c.length == 1 && (out.last().c[0].isDigit() || out.last().c[0] == '.')
+                    if (isNumber(a) && !prevDigit) out.addAll(a) else { add(out, "("); out.addAll(a); add(out, ")") }
+                    add(out, "/")
+                    add(out, "("); out.addAll(b); add(out, ")")
+                    if (outer) add(out, ")")
                 }
                 t == "\\sqrt" -> {
                     var n: List<Item>? = null
@@ -240,6 +246,9 @@ object Latex {
                 else -> fail("Nieobsługiwany symbol: $t")
             }
         }
+
+        fun isNumber(sub: List<Item>): Boolean =
+            sub.isNotEmpty() && sub.all { it.c.length == 1 && (it.c[0].isDigit() || it.c[0] == '.') }
 
         fun openAbs(out: MutableList<Item>) {
             absOpen++

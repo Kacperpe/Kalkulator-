@@ -48,15 +48,29 @@ object PhotoUtil {
         return bmp
     }
 
-    /** Wycinek zdjęcia jako wejście modelu (384×384, białe tło pod przezroczystością). */
+    /**
+     * Wycinek zdjęcia jako wejście modelu (384×384). Pomniejszanie stopniowo o połowę, żeby cienkie
+     * kreski (pisane długopisem) nie znikały, potem wyrównanie kontrastu: tło do bieli, tusz do czerni.
+     */
     fun toInput(crop: Bitmap): FloatArray {
         val s = Pre.SIZE
+        var src = crop
+        while (src.width >= 2 * s || src.height >= 2 * s) {
+            val w = if (src.width >= 2 * s) src.width / 2 else src.width
+            val h = if (src.height >= 2 * s) src.height / 2 else src.height
+            val next = Bitmap.createScaledBitmap(src, w, h, true)
+            if (src !== crop) src.recycle()
+            src = next
+        }
         val target = Bitmap.createBitmap(s, s, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(target)
         canvas.drawColor(Color.WHITE)
-        canvas.drawBitmap(crop, null, RectF(0f, 0f, s.toFloat(), s.toFloat()), Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG))
+        canvas.drawBitmap(src, null, RectF(0f, 0f, s.toFloat(), s.toFloat()), Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG))
+        if (src !== crop) src.recycle()
         val px = IntArray(s * s)
         target.getPixels(px, 0, s, 0, 0, s, s)
+        target.recycle()
+        Pre.stretchContrast(px)
         return Pre.toChw(px)
     }
 }

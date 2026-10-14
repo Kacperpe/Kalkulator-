@@ -30,6 +30,7 @@ import android.text.style.SubscriptSpan
 import android.text.style.SuperscriptSpan
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -93,6 +94,7 @@ class DPadView(context: Context, private val onDir: (Int) -> Unit) : View(contex
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action == MotionEvent.ACTION_DOWN) {
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             val nx = (event.x - width / 2f) / width
             val ny = (event.y - height / 2f) / height
             val dir = if (abs(nx) > abs(ny)) (if (nx < 0) 0 else 1) else (if (ny < 0) 2 else 3)
@@ -149,8 +151,8 @@ class MainActivity : Activity() {
 
     // ---- widoki ----
     private lateinit var statusView: TextView
-    private lateinit var exprView: TextView
-    private lateinit var resultView: TextView
+    private lateinit var exprView: MathView
+    private lateinit var resultView: MathView
     private lateinit var angleBtn: Button
     private lateinit var lastBtn: Button
 
@@ -242,16 +244,27 @@ class MainActivity : Activity() {
         return bd
     }
 
-    /** Mini-znaczniki: ^{..} indeks górny, _{..} indeks dolny. */
+    private val supChars = mapOf(
+        '0' to '⁰', '1' to '¹', '2' to '²', '3' to '³', '4' to '⁴', '5' to '⁵', '6' to '⁶', '7' to '⁷', '8' to '⁸', '9' to '⁹',
+        '-' to '⁻', '+' to '⁺', 'x' to 'ˣ', 'y' to 'ʸ', 'n' to 'ⁿ'
+    )
+    private val subChars = mapOf('x' to 'ₓ', '0' to '₀', '1' to '₁', '2' to '₂')
+
+    /** Mini-znaczniki: ^{..} indeks górny, _{..} indeks dolny. Gdzie się da - znaki Unicode (nie przesuwają linii tekstu). */
     private fun mk(src: String): CharSequence {
         val sb = SpannableStringBuilder()
         var i = 0
         while (i < src.length) {
             val ch = src[i]
             val end = if ((ch == '^' || ch == '_') && i + 1 < src.length && src[i + 1] == '{') src.indexOf('}', i) else -1
-            if (end > 0) {
+            val inner = if (end > 0) src.substring(i + 2, end) else ""
+            val table = if (ch == '^') supChars else subChars
+            if (end > 0 && inner.all { table.containsKey(it) }) {
+                for (k in inner) sb.append(table.getValue(k))
+                i = end + 1
+            } else if (end > 0) {
                 val start = sb.length
-                sb.append(src.substring(i + 2, end))
+                sb.append(inner)
                 val span: Any = if (ch == '^') SuperscriptSpan() else SubscriptSpan()
                 sb.setSpan(span, start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 sb.setSpan(RelativeSizeSpan(0.65f), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -290,6 +303,16 @@ class MainActivity : Activity() {
     }
 
     private fun insVar(v: Char) = ins(v.toString(), "\$" + v)
+
+    /** Klawisz ułamka: jeśli przed kursorem jest liczba - trafia do licznika; jeśli nie - pusty ułamek z kursorem w liczniku. */
+    private fun insFraction() {
+        val wasResult = justEvaluated
+        val prev = if (!wasResult && cursor > 0 && cursor <= tokens.size) tokens[cursor - 1].c else null
+        val endsOperand = prev != null && !prev.endsWith("(") &&
+            prev !in setOf("+", "−", "×", "÷", "/", "^", "=", ",", "~", "mod", "P", "C", "-")
+        ins("/")
+        if (!wasResult && !endsOperand) cursor--
+    }
 
     private fun trig(name: String, inv: Boolean) {
         val h = if (hyp) "h" else ""
@@ -461,9 +484,11 @@ class MainActivity : Activity() {
     ): View {
         val col = LinearLayout(this)
         col.orientation = LinearLayout.VERTICAL
-        val lp = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f)
-        lp.setMargins(dp(3), 0, dp(3), dp(3))
-        col.layoutParams = lp
+        // Cały słupek (napis SHIFT/ALPHA + klawisz + odstępy) reaguje na dotyk - bez martwych pól między klawiszami.
+        col.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f)
+        col.setPadding(dp(3), 0, dp(3), dp(3))
+        col.isClickable = true
+        col.isHapticFeedbackEnabled = true
 
         if (labeled) {
             val aText = if (aLab.isEmpty() && variable != null) variable.toString() else aLab
@@ -480,7 +505,7 @@ class MainActivity : Activity() {
             }
             val top = TextView(this)
             top.text = lab
-            top.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+            top.typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
             top.gravity = Gravity.CENTER
             top.maxLines = 1
             top.setTextColor(cShift)
@@ -492,7 +517,7 @@ class MainActivity : Activity() {
         val btn = Button(this)
         btn.isAllCaps = false
         btn.text = label
-        btn.typeface = Typeface.MONOSPACE
+        btn.typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         btn.textSize = st.size
         btn.setTextColor(st.text)
         btn.background = keyBg(st)
@@ -503,8 +528,15 @@ class MainActivity : Activity() {
         btn.minimumWidth = 0
         btn.setPadding(0, 0, 0, 0)
         btn.maxLines = 1
+        btn.gravity = Gravity.CENTER
+        btn.includeFontPadding = false
+        btn.setAutoSizeTextTypeUniformWithConfiguration(8, st.size.toInt(), 1, TypedValue.COMPLEX_UNIT_SP)
+        btn.isClickable = false
+        btn.isFocusable = false
+        btn.isDuplicateParentStateEnabled = true
         btn.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, st.btnWeight)
-        btn.setOnClickListener {
+        col.setOnClickListener {
+            col.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             message = null
             isError = false
             if (raw) {
@@ -571,6 +603,7 @@ class MainActivity : Activity() {
         }
         applyTheme(prefs.getInt("theme", 0))
         buildUi()
+        if (savedInstanceState == null) handleShared(intent)
     }
 
     private fun savePrefs() {
@@ -615,20 +648,22 @@ class MainActivity : Activity() {
         panelLp.setMargins(dp(3), 0, dp(3), dp(8))
         panel.layoutParams = panelLp
 
-        exprView = TextView(this)
-        exprView.textSize = 24f
-        exprView.typeface = Typeface.MONOSPACE
-        exprView.gravity = Gravity.START or Gravity.TOP
-        exprView.setTextColor(0xFF1B2A2A.toInt())
+        exprView = MathView(this, alignEnd = false, bold = false)
+        exprView.textSizeSp = 25f
+        exprView.color = 0xFF1B2A2A.toInt()
         exprView.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f)
+        exprView.onTapCaret = { i ->
+            leaveResultMode()
+            cursor = i.coerceIn(0, tokens.size)
+            message = null
+            refresh()
+        }
 
-        resultView = TextView(this)
-        resultView.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
-        resultView.gravity = Gravity.END or Gravity.CENTER_VERTICAL
-        resultView.maxLines = 1
-        resultView.setTextColor(0xFF0F1F1F.toInt())
-        resultView.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(54))
-        resultView.setAutoSizeTextTypeUniformWithConfiguration(16, 38, 1, TypedValue.COMPLEX_UNIT_SP)
+        resultView = MathView(this, alignEnd = true, bold = true)
+        resultView.textSizeSp = 34f
+        resultView.minScale = 0.35f
+        resultView.color = 0xFF0F1F1F.toInt()
+        resultView.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(72))
 
         panel.addView(exprView)
         panel.addView(resultView)
@@ -704,7 +739,7 @@ class MainActivity : Activity() {
         root.addView(
             row(
                 150f,
-                key("x/y", "", "÷R") { ins("/") },
+                key("a/b", "", "÷R") { insFraction() },
                 key(mk("√x"), "^{3}√x", "mod", s = { ins("³√(", "cbrt(") }, a = { ins("mod") }) { ins("√(", "sqrt(") },
                 key(mk("x^{2}"), "x^{3}", s = { ins("³", "^3") }) { ins("²", "^2") },
                 key(mk("x^{y}"), "^{x}√y", s = { ins("ˣ√", "~") }) { ins("^") },
@@ -1054,30 +1089,83 @@ class MainActivity : Activity() {
     }
 
     private fun recognize(crop: Bitmap) {
-        val progress = AlertDialog.Builder(this).setMessage("Rozpoznaję wzór…").setCancelable(false).show()
+        var aborted = false
+        val progress = AlertDialog.Builder(this)
+            .setMessage("Rozpoznaję wzór…")
+            .setCancelable(false)
+            .setNegativeButton("Anuluj") { _, _ ->
+                aborted = true
+                recognizer?.cancelled = true
+            }
+            .show()
         Thread {
             val outcome: Pair<String?, String?> = try {
-                Pair(getRecognizer().recognize(PhotoUtil.toInput(crop)), null)
+                val input = PhotoUtil.toInput(crop)
+                Pair(getRecognizer().recognize(input), null)
             } catch (t: Throwable) {
                 Pair(null, t.javaClass.simpleName + ": " + (t.message ?: ""))
             }
             runOnUiThread {
-                if (!isFinishing && !isDestroyed) {
+                if (!isFinishing && !isDestroyed && !aborted) {
                     progress.dismiss()
                     val latex = outcome.first
-                    if (latex != null) showRecognized(latex) else textDialog("Błąd rozpoznawania", outcome.second ?: "")
+                    when {
+                        latex == null -> textDialog("Błąd rozpoznawania", outcome.second ?: "")
+                        latex.isBlank() -> textDialog("Nie rozpoznano wzoru", "Spróbuj objąć ramką sam wzór, z niewielkim marginesem, przy dobrym świetle.")
+                        else -> showRecognized(latex)
+                    }
                 }
             }
         }.start()
+    }
+
+    /** Obraz udostępniony z innej aplikacji („Udostępnij → Kalkulator"), np. zrzut ekranu z zadaniem. */
+    private fun handleShared(intent: Intent?) {
+        if (intent == null || (intent.action != Intent.ACTION_SEND && intent.action != Intent.ACTION_VIEW)) return
+        @Suppress("DEPRECATION")
+        val uri = (if (intent.action == Intent.ACTION_SEND) intent.getParcelableExtra<android.net.Uri>(Intent.EXTRA_STREAM) else intent.data) ?: return
+        intent.action = null
+        val bmp = try {
+            PhotoUtil.decode({ contentResolver.openInputStream(uri) })
+        } catch (e: Exception) {
+            null
+        }
+        if (bmp == null) {
+            note("Nie udało się wczytać obrazu")
+            refresh()
+            return
+        }
+        cropDialog(bmp)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        handleShared(intent)
     }
 
     private fun showRecognized(latex: String) {
         val pretty = Latex.compact(latex)
         try {
             val items = Latex.convert(latex)
-            val shown = items.joinToString("") { it.d }
+            val box = LinearLayout(this)
+            box.orientation = LinearLayout.VERTICAL
+            box.setPadding(dp(20), dp(8), dp(20), 0)
+            val mv = MathView(this, alignEnd = false, bold = false)
+            mv.textSizeSp = 26f
+            mv.minScale = 0.4f
+            mv.color = 0xFFEDEDF0.toInt()
+            mv.show(items.map { MathLayout.Tk(it.d, it.c) }, -1)
+            box.addView(mv, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(96)))
+            val tex = TextView(this)
+            tex.text = pretty
+            tex.textSize = 12f
+            tex.typeface = Typeface.MONOSPACE
+            tex.alpha = 0.6f
+            tex.setTextIsSelectable(true)
+            tex.setPadding(0, dp(6), 0, 0)
+            box.addView(tex)
             AlertDialog.Builder(this).setTitle("Rozpoznany wzór")
-                .setMessage("Odczytano:\n" + shown + "\n\nLaTeX:\n" + pretty)
+                .setView(box)
                 .setPositiveButton("Wstaw") { _, _ ->
                     clearAll()
                     for (it in items) tokens.add(Tok(it.d, it.c))
@@ -1265,31 +1353,22 @@ class MainActivity : Activity() {
 
     // ---- odświeżanie ekranu ----
     private fun refresh() {
-        val sb = SpannableStringBuilder()
-        if (justEvaluated) {
-            sb.append(tokens.joinToString("") { it.d })
-        } else {
-            cursor = cursor.coerceIn(0, tokens.size)
-            sb.append(tokens.subList(0, cursor).joinToString("") { it.d })
-            val start = sb.length
-            sb.append("|")
-            sb.setSpan(ForegroundColorSpan(0xFF2E7D6B.toInt()), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            sb.append(tokens.subList(cursor, tokens.size).joinToString("") { it.d })
-        }
-        exprView.text = sb
+        cursor = cursor.coerceIn(0, tokens.size)
+        exprView.show(tokens.map { MathLayout.Tk(it.d, it.c) }, if (justEvaluated) -1 else cursor)
 
         val res = lastResult
         if (isError && message != null) {
-            resultView.text = message
-            resultView.setTextColor(0xFFB00020.toInt())
+            resultView.color = 0xFFB00020.toInt()
+            resultView.showText(message ?: "")
         } else {
-            resultView.setTextColor(0xFF0F1F1F.toInt())
-            resultView.text = when {
+            resultView.color = 0xFF0F1F1F.toInt()
+            val text = when {
                 res == null -> ""
                 engMode -> Formatter.eng(res)
                 fracMode -> Formatter.toFraction(res) ?: Formatter.format(res)
                 else -> Formatter.format(res)
             }
+            if (text.isEmpty()) resultView.showText("") else resultView.show(MathLayout.resultTokens(text), -1)
         }
 
         val st = SpannableStringBuilder()

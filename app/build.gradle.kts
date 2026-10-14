@@ -11,10 +11,11 @@ android {
         applicationId = "pl.kacper.kalkulator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 8
-        versionName = "1.4"
+        versionCode = 9
+        versionName = "1.5"
         ndk {
-            abiFilters += listOf("arm64-v8a")
+            // Telefon: arm64. Do testów na emulatorze można dodać x86_64: -Pabis=arm64-v8a,x86_64
+            abiFilters += ((project.findProperty("abis") as String?) ?: "arm64-v8a").split(",")
         }
     }
 
@@ -31,8 +32,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Bez R8: ONNX Runtime woła klasy Javy z kodu natywnego, a zysk na rozmiarze jest znikomy.
+            isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("release")
         }
     }

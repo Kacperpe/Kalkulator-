@@ -20,7 +20,7 @@ class LatexTest {
 
     @Test fun modelOutputs() {
         assertEquals("2\$x^3+\$x^2−13\$x+6=0", code("2 x ^ { 3 } + x ^ { 2 } - 1 3 x + 6 = 0"))
-        assertEquals("((\$x^2+3\$x−1)÷(\$x+1))", code("\\frac { x ^ { 2 } + 3 x - 1 } { x + 1 }"))
+        assertEquals("(\$x^2+3\$x−1)/(\$x+1)", code("\\frac { x ^ { 2 } + 3 x - 1 } { x + 1 }"))
         assertEquals("sqrt(5−2\$x)=3", code("\\sqrt { 5 - 2 x } = 3"))
         assertEquals("sin(2\$x+1)+cos(1−\$x)", code("\\operatorname { s i n } ( 2 x + 1 ) + \\operatorname { c o s } ( 1 - x )"))
         assertEquals("2\$x+5=11", code("2 x + 5 = 1 1"))
@@ -42,6 +42,10 @@ class LatexTest {
         assertEquals(5.0, value("\\left| 2 - 7 \\right|"), 1e-9)
         assertEquals(Math.E * Math.E, value("\\exp ( 2 )"), 1e-9)
         assertEquals(1.5, value("\\frac { 1 } { 2 } x", 3.0), 1e-9)
+        assertEquals(12.0, value("6 \\div \\frac { 1 } { 2 }"), 1e-9)
+        assertEquals(1.0, value("2 \\frac { 1 } { 2 }"), 1e-9)
+        assertEquals(1.5, value("\\frac { 1 } { 2 } 3"), 1e-9)
+        assertEquals(19.0 / 12, value("\\frac { 3 } { 4 } + \\frac { 5 } { 6 }"), 1e-9)
     }
 
     @Test fun variables() {

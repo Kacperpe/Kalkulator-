@@ -21,6 +21,7 @@ class RecognizerTest {
         val px = IntArray(n) { k ->
             ((raw[3 * k].toInt() and 255) shl 16) or ((raw[3 * k + 1].toInt() and 255) shl 8) or (raw[3 * k + 2].toInt() and 255)
         }
+        Pre.stretchContrast(px)
         return Pre.toChw(px)
     }
 
