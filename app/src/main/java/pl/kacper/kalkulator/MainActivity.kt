@@ -329,6 +329,13 @@ class MainActivity : Activity() {
      * Szablon z nawiasem (potęga, pierwiastek, mianownik): wstawia otwarcie i zamknięcie, kursor ląduje w środku.
      * W środku można wpisać dowolne działanie; ▶ wychodzi za szablon.
      */
+    /** log z dowolną podstawą: log□(□) - kursor w podstawie, ▶ przechodzi do argumentu. */
+    private fun insLogBase() {
+        ins("log(", "logb(")
+        tokens.add(cursor, Tok(",", ","))
+        tokens.add(cursor + 1, Tok(")", ")"))
+    }
+
     private fun insPair(d: String, c: String) {
         ins(d, c)
         tokens.add(cursor, Tok(")", ")"))
@@ -359,7 +366,10 @@ class MainActivity : Activity() {
         if (cursor > 0 && cursor <= tokens.size) {
             // pusty szablon (np. potęga, pierwiastek) znika w całości razem ze swoim nawiasem
             val opening = tokens[cursor - 1].c.endsWith("(")
-            if (opening && cursor < tokens.size && tokens[cursor].c == ")") tokens.removeAt(cursor)
+            if (opening && tokens[cursor - 1].c == "logb(" && cursor + 1 < tokens.size && tokens[cursor].c == "," && tokens[cursor + 1].c == ")") {
+                tokens.removeAt(cursor + 1)
+                tokens.removeAt(cursor)
+            } else if (opening && cursor < tokens.size && tokens[cursor].c == ")") tokens.removeAt(cursor)
             tokens.removeAt(cursor - 1)
             cursor--
         }
@@ -753,7 +763,7 @@ class MainActivity : Activity() {
                     mk("Log_{x}y"), "Σ", "Π",
                     s = { ins("Σ(", "sum(") },
                     a = { ins("Π(", "prod(") }
-                ) { ins("logxy(", "logb(") }
+                ) { insLogBase() }
             )
         )
         root.addView(row(245f, leftGroup, dpad, rightGroup))
@@ -766,8 +776,8 @@ class MainActivity : Activity() {
                 key(mk("√x"), "^{3}√x", "mod", s = { insPair("³√(", "cbrt(") }, a = { ins("mod") }) { insPair("√(", "sqrt(") },
                 key(mk("x^{2}"), "x^{3}", s = { ins("³", "^3") }) { ins("²", "^2") },
                 key(mk("x^{y}"), "^{x}√y", s = { ins("ˣ√", "~") }) { insPair("^(", "^(") },
-                key("Log", "10^{x}", s = { ins("1"); ins("0"); insPair("^(", "^(") }) { ins("log(") },
-                key("Ln", "e^{x}", variable = 't', s = { ins("e"); insPair("^(", "^(") }) { ins("ln(") }
+                key("Log", "10^{x}", s = { ins("1"); ins("0"); insPair("^(", "^(") }) { insPair("log(", "log(") },
+                key("Ln", "e^{x}", variable = 't', s = { ins("e"); insPair("^(", "^(") }) { insPair("ln(", "ln(") }
             )
         )
         root.addView(

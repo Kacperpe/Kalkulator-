@@ -138,5 +138,8 @@ class EvaluatorTest {
         assertEquals(3.0, e.evaluate("cbrt(20+7)"), 1e-9)
         assertEquals(0.5, e.evaluate("(1+2)/(3+3)"), 1e-9)
         assertEquals(1000.0, e.evaluate("10^(1+2)"), 1e-9)
+        assertEquals(5.0, e.evaluate("logb(2,8×4)"), 1e-9)
+        assertEquals(3.0, e.evaluate("logb(1+1,2^(3))"), 1e-9)
+        assertEquals(2.0, e.evaluate("log(50+50)"), 1e-9)
     }
 }

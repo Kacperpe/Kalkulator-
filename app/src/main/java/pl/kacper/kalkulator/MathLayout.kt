@@ -19,6 +19,8 @@ object MathLayout {
     class Row(val nodes: List<Node>, val start: Int, val end: Int, val box: Boolean) : Node()
     class Frac(val num: Row, val den: Row) : Node()
     class Sup(val exp: Row, val hat: Int) : Node()
+    /** Logarytm o dowolnej podstawie: log_{podstawa}(argument). */
+    class LogB(val open: Int, val base: Row, val arg: Row, val close: Int) : Node()
     class Radical(val open: Int, val inner: Row, val close: Int, val index: String = "") : Node()
 
     private val binaryOps = setOf("+", "−", "-", "×", "÷", "*", "=", "mod", "P", "C", "~")
@@ -128,6 +130,23 @@ object MathLayout {
                         nodes.add(Glyph(t[i].d, i))
                         i++
                     }
+                }
+                s == "logb(" -> {
+                    val close = matching(i, to)
+                    val end = if (close < 0) to else close
+                    // przecinek na najwyższym poziomie oddziela podstawę od argumentu
+                    var comma = -1
+                    var depth = 0
+                    for (k in i + 1 until end) {
+                        val ck = c(k)
+                        if (ck.endsWith("(")) depth++
+                        else if (ck == ")") depth--
+                        else if (ck == "," && depth == 0) { comma = k; break }
+                    }
+                    val base = if (comma < 0) seq(i + 1, end, true) else seq(i + 1, comma, true)
+                    val arg = if (comma < 0) Row(emptyList(), end, end, true) else seq(comma + 1, end, true)
+                    nodes.add(LogB(i, base, arg, close))
+                    i = if (close < 0) to else close + 1
                 }
                 s.endsWith("(") -> {
                     val close = matching(i, to)
@@ -256,6 +275,14 @@ object MathLayout {
                 val raise = supRaise(size, prev, eb)
                 Box(eb.w + size * 0.06f, raise + eb.asc, max(0f, eb.desc - raise))
             }
+            is LogB -> {
+                val ss = supSize(size)
+                val bb = measure(n.base, ss, level + 1, null)
+                val ab = measure(n.arg, size, level, null)
+                val w = m.width("log", size, false) + size * 0.02f + bb.w + size * 0.04f +
+                    m.width("(", size, false) + ab.w + m.width(")", size, false)
+                Box(w, max(size * ASC, ab.asc), max(max(size * DESC, ab.desc), size * 0.3f + bb.desc))
+            }
             is Radical -> {
                 val ib = measure(n.inner, size, level, null)
                 Box(ib.w + size * 0.62f + idxPad(n, size), ib.asc + size * 0.12f + bar(size), ib.desc + size * 0.06f)
@@ -327,6 +354,27 @@ object MathLayout {
                     place(n.exp, x + size * 0.03f, base - supRaise(size, prev, eb), ss, level + 1, null)
                     return b
                 }
+                is LogB -> {
+                    val b = measure(n, size, level, prev)
+                    val ss = supSize(size)
+                    val bb = measure(n.base, ss, level + 1, null)
+                    val ab = measure(n.arg, size, level, null)
+                    var cx = x
+                    ops.add(TextOp("log", cx, base, size, false))
+                    caret(n.open, x, base, size)
+                    cx += m.width("log", size, false) + size * 0.02f
+                    place(n.base, cx, base + size * 0.3f, ss, level + 1, null)
+                    cx += bb.w + size * 0.04f
+                    ops.add(TextOp("(", cx, base, size, false))
+                    cx += m.width("(", size, false)
+                    place(n.arg, cx, base, size, level, null)
+                    cx += ab.w
+                    if (n.close >= 0) {
+                        ops.add(TextOp(")", cx, base, size, false))
+                        caret(n.close + 1, x + b.w, base, size)
+                    }
+                    b
+                }
                 is Radical -> {
                     val b0 = measure(n, size, level, prev)
                     val io = idxPad(n, size)
@@ -378,6 +426,7 @@ object MathLayout {
         is Frac -> "{" + dump(n.num) + "|" + dump(n.den) + "}"
         is Sup -> "^[" + dump(n.exp) + "]"
         is Radical -> "√[" + dump(n.inner) + "]"
+        is LogB -> "log_[" + dump(n.base) + "](" + dump(n.arg) + ")"
     }
 
 }

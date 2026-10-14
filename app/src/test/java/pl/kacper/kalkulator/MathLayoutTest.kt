@@ -102,4 +102,22 @@ class MathLayoutTest {
         assertTrue(texts.filter { it.text in listOf("1", "2", "3") }.all { it.y < bar.y1 })
         assertTrue(texts.filter { it.text in listOf("4", "5", "6") }.all { it.y > bar.y1 })
     }
+
+    @Test fun logarithmWithBase() {
+        val t = listOf(
+            MathLayout.Tk("log(", "logb("), MathLayout.Tk("2", "2"), MathLayout.Tk(",", ","),
+            MathLayout.Tk("8", "8"), MathLayout.Tk("×", "×"), MathLayout.Tk("4", "4"), MathLayout.Tk(")", ")"),
+            MathLayout.Tk("+", "+"), MathLayout.Tk("1", "1")
+        )
+        assertEquals("log_[2](8×4)+1", dump(t))
+        val empty = listOf(MathLayout.Tk("log(", "logb("), MathLayout.Tk(",", ","), MathLayout.Tk(")", ")"))
+        assertEquals("log_[□](□)", dump(empty))
+        for (tt in listOf(t, empty)) for (cur in 0..tt.size) {
+            val r = MathLayout.layout(MathLayout.parse(tt, cur), 40f, meter)
+            assertTrue("brak kursora $cur", r.carets.containsKey(cur))
+        }
+        // podstawa niżej niż argument (indeks dolny)
+        val r = MathLayout.layout(MathLayout.parse(empty, 1), 40f, meter)
+        assertTrue(r.carets.getValue(1).bottom > r.carets.getValue(2).bottom)
+    }
 }

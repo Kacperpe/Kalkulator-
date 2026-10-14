@@ -64,6 +64,14 @@ tapk "AC"
 for k in "a/b" 1 + 2; do tapk "$k"; done
 shot 06e_ulamek_szablon
 tapk "AC"
+# logarytm z podstawą: log₂(8×4), ▶ z podstawy do argumentu (prawa strzałka krzyżaka)
+tapk "Logₓy"; tapk 2
+shot 06f_log_podstawa
+adb shell input tap 671 829; sleep 0.5
+for k in 8 × 4; do tapk "$k"; done
+shot 06g_log_argument
+tapk "="; sleep 1; shot 06h_log_wynik
+tapk "AC"
 for k in 2 "xʸ" 1 0 − "√x" 9; do tapk "$k"; done
 shot 06_potega_pierwiastek
 tapk "="

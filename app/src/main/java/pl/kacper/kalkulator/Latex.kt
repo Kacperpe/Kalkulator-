@@ -306,7 +306,7 @@ object Latex {
             if (code == "exp") {
                 add(out, "e"); add(out, "^"); add(out, "("); out.addAll(a); add(out, ")")
             } else if (code == "log" && base != null && base.isNotEmpty()) {
-                add(out, "logxy(", "logb(")
+                add(out, "log(", "logb(")
                 out.addAll(base)
                 add(out, ",")
                 out.addAll(a)
