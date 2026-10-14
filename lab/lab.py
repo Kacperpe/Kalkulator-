@@ -129,7 +129,26 @@ def margin(img, f=0.06):
     return c
 
 
+def halving(img, s=384):
+    while img.width >= 2 * s or img.height >= 2 * s:
+        img = img.resize((img.width // 2 if img.width >= 2 * s else img.width, img.height // 2 if img.height >= 2 * s else img.height), Image.BILINEAR)
+    return img
+
+
+def stretch(img):
+    """Jak Pre.stretchContrast w aplikacji."""
+    g = (np.asarray(img).astype(np.int32) * np.array([299, 587, 114])).sum(axis=2) // 1000
+    lo, hi = np.percentile(g, 2, method="lower"), np.percentile(g, 50, method="lower")
+    if hi - lo < 24:
+        v = g
+    else:
+        v = np.clip((g - lo) / (hi - lo) * 255, 0, 255)
+    v = v.astype(np.uint8)
+    return Image.fromarray(np.stack([v, v, v], axis=2))
+
+
 PREP = {
+    "P6_app_new": lambda im: stretch(android_bilinear(halving(im))),
     "P0_android_stretch": lambda im: android_bilinear(im),
     "P1_aa_stretch": lambda im: im.resize((384, 384), Image.BOX),
     "P2_norm_aa_stretch": lambda im: normalize(im).resize((384, 384), Image.BOX),
@@ -215,4 +234,4 @@ if __name__ == "__main__":
     if sys.argv[1] == "prepare":
         prepare()
     else:
-        evaluate(sys.argv[2:] or ["fp32", "q_matmul", "q_full"])
+        evaluate(sys.argv[2:] or ["q_full"])
