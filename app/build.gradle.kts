@@ -11,8 +11,8 @@ android {
         applicationId = "pl.kacper.kalkulator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 9
-        versionName = "1.5"
+        versionCode = 10
+        versionName = "1.6"
         ndk {
             // Telefon: arm64. Do testów na emulatorze można dodać x86_64: -Pabis=arm64-v8a,x86_64
             abiFilters += ((project.findProperty("abis") as String?) ?: "arm64-v8a").split(",")
