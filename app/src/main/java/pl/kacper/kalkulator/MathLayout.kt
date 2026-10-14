@@ -19,10 +19,10 @@ object MathLayout {
     class Row(val nodes: List<Node>, val start: Int, val end: Int, val box: Boolean) : Node()
     class Frac(val num: Row, val den: Row) : Node()
     class Sup(val exp: Row, val hat: Int) : Node()
-    class Radical(val open: Int, val inner: Row, val close: Int) : Node()
+    class Radical(val open: Int, val inner: Row, val close: Int, val index: String = "") : Node()
 
     private val binaryOps = setOf("+", "−", "-", "×", "÷", "*", "=", "mod", "P", "C", "~")
-    private val notOperand = binaryOps + setOf(",", ")", "/", "^", "!", "%", "^2", "^3", "^(-1)", ";")
+    private val notOperand = binaryOps + setOf(",", ")", "/", "^", "^(", "!", "%", "^2", "^3", "^(-1)", ";")
 
     /** Buduje drzewo z listy żetonów; nawiasy wokół licznika, mianownika i wykładnika są ukrywane, gdy nie stoi w nich kursor. */
     fun parse(toks: List<Tk>, cursor: Int = -1): Row = Parser(toks, cursor).seq(0, toks.size, false)
@@ -93,7 +93,10 @@ object MathLayout {
             return Row(out, from, to, box)
         }
 
-        /** Zdejmuje nawiasy z grupy „( … )" jeśli kursor nie stoi w środku (licznik, mianownik, wykładnik). */
+        /**
+         * Zdejmuje nawiasy z grupy „( … )" w liczniku, mianowniku i wykładniku - kreska ułamkowa i indeks górny
+         * same pokazują, co jest razem. Środek zostaje osobnym polem (pustym - z ramką), żeby kursor miał gdzie stanąć.
+         */
         fun unwrap(nodes: List<Node>): List<Node> {
             if (nodes.size != 1) return nodes
             val g = nodes[0]
@@ -101,8 +104,7 @@ object MathLayout {
                 val first = g.nodes.first()
                 val last = g.nodes.last()
                 if (first is Glyph && last is Glyph && first.index >= 0 && last.index >= 0 && t[first.index].c == "(" && t[last.index].c == ")") {
-                    val inside = cursor > first.index && cursor <= last.index
-                    if (!inside) return g.nodes.subList(1, g.nodes.size - 1)
+                    return listOf(Row(g.nodes.subList(1, g.nodes.size - 1), first.index + 1, last.index, true))
                 }
             }
             return nodes
@@ -131,8 +133,8 @@ object MathLayout {
                     val close = matching(i, to)
                     val end = if (close < 0) to else close
                     val inner = seq(i + 1, end, false)
-                    if (s == "sqrt(") {
-                        nodes.add(Radical(i, Row(inner.nodes, i + 1, end, true), close))
+                    if (s == "sqrt(" || s == "cbrt(") {
+                        nodes.add(Radical(i, Row(inner.nodes, i + 1, end, true), close, if (s == "cbrt(") "3" else ""))
                     } else {
                         val g = ArrayList<Node>()
                         g.add(Glyph(t[i].d, i))
@@ -156,6 +158,14 @@ object MathLayout {
                     "^2" -> { nodes.add(Sup(Row(listOf(Glyph("2", -1)), -1, -1, false), i)); i++ }
                     "^3" -> { nodes.add(Sup(Row(listOf(Glyph("3", -1)), -1, -1, false), i)); i++ }
                     "^(-1)" -> { nodes.add(Sup(Row(listOf(Glyph("−1", -1)), -1, -1, false), i)); i++ }
+                    "^(" -> {
+                        // wykładnik-szablon: wszystko do nawiasu zamykającego
+                        val close = matching(i, to)
+                        val end = if (close < 0) to else close
+                        val inner = seq(i + 1, end, false)
+                        nodes.add(Sup(Row(inner.nodes, i + 1, end, true), i))
+                        i = if (close < 0) to else close + 1
+                    }
                     "^" -> {
                         val e = operand(i + 1, to, true)
                         if (e != null) {
@@ -248,9 +258,11 @@ object MathLayout {
             }
             is Radical -> {
                 val ib = measure(n.inner, size, level, null)
-                Box(ib.w + size * 0.62f, ib.asc + size * 0.12f + bar(size), ib.desc + size * 0.06f)
+                Box(ib.w + size * 0.62f + idxPad(n, size), ib.asc + size * 0.12f + bar(size), ib.desc + size * 0.06f)
             }
         }
+
+        fun idxPad(n: Radical, size: Float) = if (n.index.isEmpty()) 0f else size * 0.2f
 
         fun supRaise(size: Float, prev: Box?, eb: Box): Float {
             val base = prev?.asc ?: (size * ASC)
@@ -316,7 +328,11 @@ object MathLayout {
                     return b
                 }
                 is Radical -> {
-                    val b = measure(n, size, level, prev)
+                    val b0 = measure(n, size, level, prev)
+                    val io = idxPad(n, size)
+                    val b = Box(b0.w - io, b0.asc, b0.desc)
+                    val x0 = x
+                    @Suppress("NAME_SHADOWING") val x = x0 + io
                     val ib = measure(n.inner, size, level, null)
                     val t = bar(size)
                     val top = base - b.asc + t / 2
@@ -331,10 +347,11 @@ object MathLayout {
                         x + b.w - size * 0.04f, top
                     )
                     ops.add(PathOp(pts, t * 1.1f))
-                    caret(n.open, x, base, size)
+                    if (n.index.isNotEmpty()) ops.add(TextOp(n.index, x0 + size * 0.02f, top + h * 0.48f, size * 0.42f, false))
+                    caret(n.open, x0, base, size)
                     place(n.inner, x + size * 0.56f, base, size, level, null)
                     if (n.close >= 0) caret(n.close + 1, x + b.w, base, size)
-                    return b
+                    return b0
                 }
             }
         }

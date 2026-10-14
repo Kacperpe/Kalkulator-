@@ -35,10 +35,26 @@ class MathLayoutTest {
         assertEquals("{sin(30)|2}", dump(toks("sin(", "3", "0", ")", "/", "2")))
     }
 
-    @Test fun parenthesesStayVisibleWhileEditingInside() {
-        val t = toks("(", "x", "+", "1", ")", "/", "2")
-        assertEquals("{x+1|2}", dump(t, 7))
-        assertEquals("{(x+1)|2}", dump(t, 2))
+    @Test fun templatesForPowerRootAndFraction() {
+        // potęga z działaniem w wykładniku, kursor może stać w środku
+        val pow = toks("2", "^(", "3", "+", "1", ")", "−", "1")
+        assertEquals("2^[3+1]−1", dump(pow, 4))
+        assertEquals("2^[□]", dump(toks("2", "^(", ")")))
+        // pierwiastek z działaniem
+        assertEquals("√[9+16]+1", dump(toks("√(", "9", "+", "1", "6", ")", "+", "1")))
+        assertEquals("√[□]", dump(toks("√(", ")")))
+        // pusty ułamek-szablon i ułamek z działaniami w liczniku i mianowniku
+        assertEquals("{□|□}", dump(toks("(", ")", "/", "(", ")")))
+        assertEquals("{x+1|x−1}", dump(toks("(", "x", "+", "1", ")", "/", "(", "x", "−", "1", ")"), 2))
+        // każde miejsce kursora w szablonach jest widoczne
+        val cases = listOf(pow, toks("2", "^(", ")"), toks("(", ")", "/", "(", ")"), toks("cbrt(", "8", ")", "+", "1"))
+        for (t in cases) for (cur in 0..t.size) {
+            val r = MathLayout.layout(MathLayout.parse(t, cur), 40f, meter)
+            assertTrue("brak kursora $cur w ${t.joinToString(" ") { it.c }}", r.carets.containsKey(cur))
+        }
+        // kursor w pustym wykładniku stoi wyżej niż przed nim (w indeksie górnym)
+        val r = MathLayout.layout(MathLayout.parse(toks("2", "^(", ")"), 2), 40f, meter)
+        assertTrue(r.carets.getValue(2).bottom < r.carets.getValue(1).bottom)
     }
 
     @Test fun powersAndRoots() {

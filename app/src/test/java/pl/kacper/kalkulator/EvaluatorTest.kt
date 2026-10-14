@@ -130,4 +130,13 @@ class EvaluatorTest {
         assertEquals("12.345×10^3", Formatter.eng(12345.0))
         assertEquals("500×10^-6", Formatter.eng(0.0005))
     }
+
+    @Test fun templates() {
+        val e = Evaluator(AngleMode.RAD)
+        assertEquals(15.0, e.evaluate("2^(3+1)−1"), 1e-9)
+        assertEquals(6.0, e.evaluate("sqrt(9+16)+1"), 1e-9)
+        assertEquals(3.0, e.evaluate("cbrt(20+7)"), 1e-9)
+        assertEquals(0.5, e.evaluate("(1+2)/(3+3)"), 1e-9)
+        assertEquals(1000.0, e.evaluate("10^(1+2)"), 1e-9)
+    }
 }

@@ -207,7 +207,7 @@ class MainActivity : Activity() {
         }
     }
 
-    private val contOps = setOf("+", "−", "×", "÷", "/", "!", "%", "P", "C", "^", "^2", "^3", "^(-1)", "~", "mod")
+    private val contOps = setOf("+", "−", "×", "÷", "/", "!", "%", "P", "C", "^", "^(", "^2", "^3", "^(-1)", "~", "mod")
 
     private fun dp(v: Int): Int = (v * resources.displayMetrics.density + 0.5f).toInt()
 
@@ -308,10 +308,30 @@ class MainActivity : Activity() {
     private fun insFraction() {
         val wasResult = justEvaluated
         val prev = if (!wasResult && cursor > 0 && cursor <= tokens.size) tokens[cursor - 1].c else null
-        val endsOperand = prev != null && !prev.endsWith("(") &&
-            prev !in setOf("+", "−", "×", "÷", "/", "^", "=", ",", "~", "mod", "P", "C", "-")
-        ins("/")
-        if (!wasResult && !endsOperand) cursor--
+        val endsOperand = wasResult || (prev != null && !prev.endsWith("(") &&
+            prev !in setOf("+", "−", "×", "÷", "/", "^", "=", ",", "~", "mod", "P", "C", "-"))
+        if (endsOperand) {
+            // licznik już jest - mianownik jako szablon, w którym można wpisać całe działanie
+            ins("/")
+            insPair("(", "(")
+        } else {
+            // pusty ułamek: licznik i mianownik jako szablony, kursor w liczniku
+            insPair("(", "(")
+            val inNum = cursor
+            cursor++
+            ins("/")
+            insPair("(", "(")
+            cursor = inNum
+        }
+    }
+
+    /**
+     * Szablon z nawiasem (potęga, pierwiastek, mianownik): wstawia otwarcie i zamknięcie, kursor ląduje w środku.
+     * W środku można wpisać dowolne działanie; ▶ wychodzi za szablon.
+     */
+    private fun insPair(d: String, c: String) {
+        ins(d, c)
+        tokens.add(cursor, Tok(")", ")"))
     }
 
     private fun trig(name: String, inv: Boolean) {
@@ -337,6 +357,9 @@ class MainActivity : Activity() {
         leaveResultMode()
         lastResult = null
         if (cursor > 0 && cursor <= tokens.size) {
+            // pusty szablon (np. potęga, pierwiastek) znika w całości razem ze swoim nawiasem
+            val opening = tokens[cursor - 1].c.endsWith("(")
+            if (opening && cursor < tokens.size && tokens[cursor].c == ")") tokens.removeAt(cursor)
             tokens.removeAt(cursor - 1)
             cursor--
         }
@@ -740,11 +763,11 @@ class MainActivity : Activity() {
             row(
                 150f,
                 key("a/b", "", "÷R") { insFraction() },
-                key(mk("√x"), "^{3}√x", "mod", s = { ins("³√(", "cbrt(") }, a = { ins("mod") }) { ins("√(", "sqrt(") },
+                key(mk("√x"), "^{3}√x", "mod", s = { insPair("³√(", "cbrt(") }, a = { ins("mod") }) { insPair("√(", "sqrt(") },
                 key(mk("x^{2}"), "x^{3}", s = { ins("³", "^3") }) { ins("²", "^2") },
-                key(mk("x^{y}"), "^{x}√y", s = { ins("ˣ√", "~") }) { ins("^") },
-                key("Log", "10^{x}", s = { ins("10^(") }) { ins("log(") },
-                key("Ln", "e^{x}", variable = 't', s = { ins("e^(") }) { ins("ln(") }
+                key(mk("x^{y}"), "^{x}√y", s = { ins("ˣ√", "~") }) { insPair("^(", "^(") },
+                key("Log", "10^{x}", s = { ins("1"); ins("0"); insPair("^(", "^(") }) { ins("log(") },
+                key("Ln", "e^{x}", variable = 't', s = { ins("e"); insPair("^(", "^(") }) { ins("ln(") }
             )
         )
         root.addView(

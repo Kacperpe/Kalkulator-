@@ -52,7 +52,18 @@ tapk "AC"
 tapk "a/b"; tapk 7; shot 05_pusty_ulamek
 tapk "AC"
 
-# potęga i pierwiastek
+# szablony: działania w wykładniku i pod pierwiastkiem (bez wychodzenia)
+for k in 2 "xʸ" 1 + 2; do tapk "$k"; done
+shot 06a_wykladnik_w_trakcie
+tapk "="; sleep 1; shot 06b_wykladnik_wynik
+tapk "AC"
+for k in "√x" 9 + 1 6; do tapk "$k"; done
+shot 06c_pierwiastek_w_trakcie
+tapk "="; sleep 1; shot 06d_pierwiastek_wynik
+tapk "AC"
+for k in "a/b" 1 + 2; do tapk "$k"; done
+shot 06e_ulamek_szablon
+tapk "AC"
 for k in 2 "xʸ" 1 0 − "√x" 9; do tapk "$k"; done
 shot 06_potega_pierwiastek
 tapk "="
