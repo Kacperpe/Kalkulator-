@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="pl.kacper.kalkulator.EvaluatorTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-14T15:50:20" hostname="runnervmmprz5" time="0.137">
+  <properties/>
+  <testcase name="variablesAndExtras" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.034"/>
+  <testcase name="trigRadiansAndGrad" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.001"/>
+  <testcase name="trigDegrees" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.001"/>
+  <testcase name="powersAndRoots" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.001"/>
+  <testcase name="combinatorics" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.001"/>
+  <testcase name="logsAndConstants" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.0"/>
+  <testcase name="calculus" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.073"/>
+  <testcase name="ansAndErrors" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.004"/>
+  <testcase name="fractions" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.014"/>
+  <testcase name="formatting" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.005"/>
+  <testcase name="basicArithmetic" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.0"/>
+  <testcase name="percentAndExponent" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.0"/>
+  <testcase name="engineering" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.0"/>
+  <testcase name="templates" classname="pl.kacper.kalkulator.EvaluatorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
