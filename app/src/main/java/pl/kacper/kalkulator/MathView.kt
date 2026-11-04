@@ -6,12 +6,18 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Typeface
 import android.view.MotionEvent
+import android.view.VelocityTracker
 import android.view.View
+import android.view.ViewConfiguration
+import android.widget.OverScroller
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-/** Wyświetlacz wzoru: ułamki piętrowe, potęgi, pierwiastki, migający kursor; stuknięcie przesuwa kursor. */
+/**
+ * Wyświetlacz wzoru: ułamki piętrowe, potęgi, pierwiastki, migający kursor; stuknięcie przesuwa kursor.
+ * Długi wzór nie jest zmniejszany — przewija się w poziomie (za kursorem albo palcem).
+ */
 class MathView(context: Context, private val alignEnd: Boolean, bold: Boolean) : View(context) {
     private val d = resources.displayMetrics.density
     @Suppress("DEPRECATION")
@@ -41,6 +47,24 @@ class MathView(context: Context, private val alignEnd: Boolean, bold: Boolean) :
     private var offX = 0f
     private var offY = 0f
     private var blinkOn = true
+
+    // przewijanie w poziomie
+    private var contentW = 0f
+    private var lastToks: List<MathLayout.Tk>? = null
+    private var lastPlain: String? = null
+    private var hasScrollPos = false
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+    private val minFling = ViewConfiguration.get(context).scaledMinimumFlingVelocity
+    private val scroller = OverScroller(context)
+    private var velocity: VelocityTracker? = null
+    private var downX = 0f
+    private var lastX = 0f
+    private var dragging = false
+
+    init {
+        isHorizontalFadingEdgeEnabled = true
+        setFadingEdgeLength((20 * d).toInt())
+    }
 
     private val meter = object : MathLayout.Meter {
         override fun width(text: String, size: Float, italic: Boolean): Float {
@@ -109,20 +133,61 @@ class MathView(context: Context, private val alignEnd: Boolean, bold: Boolean) :
         val availW = max(1f, width - 2 * padX)
         val availH = max(1f, height.toFloat() - 2 * d)
         val h = r.asc + r.desc
-        scale = min(1f, min(availW / max(1f, r.w), availH / max(1f, h)))
-        scale = max(scale, minScale)
+        // zmniejszamy tylko gdy wzór jest za wysoki (piętrowe ułamki), nigdy z powodu długości
+        scale = max(min(1f, availH / max(1f, h)), minScale)
         val sw = r.w * scale
         val sh = h * scale
+        contentW = sw
         offY = max(0f, (height - sh) / 2)
         if (!alignEnd) offY = min(offY, 6 * d)
-        offX = if (alignEnd) width - padX - sw else padX
-        if (sw > availW) {
-            // za szeroko: przesuwamy tak, żeby kursor (albo koniec) był widoczny
-            val cx = (r.carets[cursor]?.x ?: r.w) * scale
-            offX = if (alignEnd && cursor < 0) width - padX - sw else min(padX, width - padX - cx - 8 * d)
-            offX = max(offX, width - padX - sw)
+
+        val changed = toks != lastToks || plain != lastPlain
+        lastToks = toks
+        lastPlain = plain
+        if (sw <= availW) {
+            scroller.forceFinished(true)
+            offX = if (alignEnd) width - padX - sw else padX
+            hasScrollPos = false
+        } else {
+            if (!hasScrollPos || (changed && cursor < 0)) {
+                // nowy długi wynik / wzór bez kursora: pokazujemy początek
+                offX = padX
+                hasScrollPos = true
+            }
+            if (cursor >= 0) {
+                scroller.forceFinished(true)
+                // przesuwamy tylko tyle, żeby kursor był widoczny (jak w polu tekstowym)
+                val cx = (r.carets[cursor]?.x ?: r.w) * scale
+                val margin = 12 * d
+                if (offX + cx > width - padX - margin) offX = width - padX - margin - cx
+                if (offX + cx < padX + margin) offX = padX + margin - cx
+            }
+            offX = clampOff(offX)
         }
         invalidate()
+    }
+
+    private fun minOff(): Float = min(4 * d, width - 4 * d - contentW)
+
+    private fun clampOff(x: Float): Float = x.coerceIn(minOff(), 4 * d)
+
+    private fun canScroll(): Boolean = contentW > width - 8 * d
+
+    override fun getLeftFadingEdgeStrength(): Float {
+        if (!canScroll()) return 0f
+        return ((4 * d - offX) / (20 * d)).coerceIn(0f, 1f)
+    }
+
+    override fun getRightFadingEdgeStrength(): Float {
+        if (!canScroll()) return 0f
+        return ((offX - minOff()) / (20 * d)).coerceIn(0f, 1f)
+    }
+
+    override fun computeScroll() {
+        if (scroller.computeScrollOffset()) {
+            offX = clampOff(scroller.currX.toFloat())
+            postInvalidateOnAnimation()
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -176,23 +241,74 @@ class MathView(context: Context, private val alignEnd: Boolean, bold: Boolean) :
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val cb = onTapCaret ?: return false
-        if (event.actionMasked == MotionEvent.ACTION_UP) {
-            val r = res ?: return true
-            val x = (event.x - offX) / scale
-            val y = (event.y - offY) / scale
-            var best = -1
-            var bestD = Float.MAX_VALUE
-            for ((i, c) in r.carets) {
-                val dy = if (y < c.top) c.top - y else if (y > c.bottom) y - c.bottom else 0f
-                val dist = abs(c.x - x) + dy * 1.5f
-                if (dist < bestD) {
-                    bestD = dist
-                    best = i
+        val cb = onTapCaret
+        if (cb == null && !canScroll()) return false
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                scroller.forceFinished(true)
+                downX = event.x
+                lastX = event.x
+                dragging = false
+                velocity?.recycle()
+                velocity = VelocityTracker.obtain()
+                velocity?.addMovement(event)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                velocity?.addMovement(event)
+                if (!dragging && canScroll() && abs(event.x - downX) > touchSlop) {
+                    dragging = true
+                    parent?.requestDisallowInterceptTouchEvent(true)
+                    lastX = event.x
+                }
+                if (dragging) {
+                    offX = clampOff(offX + event.x - lastX)
+                    lastX = event.x
+                    hasScrollPos = true
+                    invalidate()
                 }
             }
-            if (best >= 0) cb(best)
+            MotionEvent.ACTION_UP -> {
+                velocity?.addMovement(event)
+                if (dragging) {
+                    val v = velocity
+                    if (v != null) {
+                        v.computeCurrentVelocity(1000)
+                        val vx = v.xVelocity
+                        if (abs(vx) > minFling) {
+                            scroller.fling(offX.toInt(), 0, vx.toInt(), 0, minOff().toInt(), (4 * d).toInt(), 0, 0)
+                            postInvalidateOnAnimation()
+                        }
+                    }
+                } else if (cb != null) {
+                    tapCaret(event.x, event.y, cb)
+                }
+                velocity?.recycle()
+                velocity = null
+                dragging = false
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                velocity?.recycle()
+                velocity = null
+                dragging = false
+            }
         }
         return true
+    }
+
+    private fun tapCaret(ex: Float, ey: Float, cb: (Int) -> Unit) {
+        val r = res ?: return
+        val x = (ex - offX) / scale
+        val y = (ey - offY) / scale
+        var best = -1
+        var bestD = Float.MAX_VALUE
+        for ((i, c) in r.carets) {
+            val dy = if (y < c.top) c.top - y else if (y > c.bottom) y - c.bottom else 0f
+            val dist = abs(c.x - x) + dy * 1.5f
+            if (dist < bestD) {
+                bestD = dist
+                best = i
+            }
+        }
+        if (best >= 0) cb(best)
     }
 }
