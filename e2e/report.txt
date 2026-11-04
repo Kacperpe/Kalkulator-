@@ -1,0 +1,59 @@
+[e2e] klawisze: 9
+[e2e] BRAK KLAWISZA: 1
+[e2e] BRAK KLAWISZA: a/b
+[e2e] BRAK KLAWISZA: 2
+[e2e] BRAK KLAWISZA: +
+[e2e] BRAK KLAWISZA: 3
+[e2e] BRAK KLAWISZA: a/b
+[e2e] BRAK KLAWISZA: 4
+[e2e] BRAK KLAWISZA: =
+[e2e] BRAK KLAWISZA: S⇔D
+[e2e] BRAK KLAWISZA: AC
+[e2e] BRAK KLAWISZA: a/b
+[e2e] BRAK KLAWISZA: 7
+[e2e] BRAK KLAWISZA: AC
+[e2e] BRAK KLAWISZA: 2
+[e2e] BRAK KLAWISZA: xʸ
+[e2e] BRAK KLAWISZA: 1
+[e2e] BRAK KLAWISZA: +
+[e2e] BRAK KLAWISZA: 2
+[e2e] BRAK KLAWISZA: =
+[e2e] BRAK KLAWISZA: AC
+[e2e] BRAK KLAWISZA: √x
+[e2e] BRAK KLAWISZA: 9
+[e2e] BRAK KLAWISZA: +
+[e2e] BRAK KLAWISZA: 1
+[e2e] BRAK KLAWISZA: 6
+[e2e] BRAK KLAWISZA: =
+[e2e] BRAK KLAWISZA: AC
+[e2e] BRAK KLAWISZA: a/b
+[e2e] BRAK KLAWISZA: 1
+[e2e] BRAK KLAWISZA: +
+[e2e] BRAK KLAWISZA: 2
+[e2e] BRAK KLAWISZA: AC
+[e2e] BRAK KLAWISZA: Logₓy
+[e2e] BRAK KLAWISZA: 2
+[e2e] BRAK KLAWISZA: 8
+[e2e] BRAK KLAWISZA: ×
+[e2e] BRAK KLAWISZA: 4
+[e2e] BRAK KLAWISZA: =
+[e2e] BRAK KLAWISZA: AC
+[e2e] BRAK KLAWISZA: 2
+[e2e] BRAK KLAWISZA: xʸ
+[e2e] BRAK KLAWISZA: 1
+[e2e] BRAK KLAWISZA: 0
+[e2e] BRAK KLAWISZA: −
+[e2e] BRAK KLAWISZA: √x
+[e2e] BRAK KLAWISZA: 9
+[e2e] BRAK KLAWISZA: =
+[e2e] BRAK KLAWISZA: AC
+[e2e] media id: 18
+[e2e] udostępnienie z MediaStore bez dostępu - plik w katalogu aplikacji
+[e2e] udostępnienie z powłoki nie dało dostępu do pliku - przez galerię
+[e2e] BRAK KLAWISZA: ≡
+[e2e] BRAK NA EKRANIE: Wybierz zdjęcie z galerii
+[e2e] BRAK NA EKRANIE: Show roots
+[e2e] BRAK NA EKRANIE: Downloads
+[e2e] w galerii nie widać pliku
+[e2e] BRAK NA EKRANIE: Rozpoznaj
+[e2e] nie ma przycisku Rozpoznaj

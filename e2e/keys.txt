@@ -1,0 +1,9 @@
+Aktualizacja	540 679
+Dostępna jest nowa wersja v12 (29 MB).
+
+Aktualizacje z wydań GitHuba (bez tokena)
+
+W menu: Aplikacja → Sprawdź aktualizacje; przy starcie cicho sprawdza co 6 h.	540 953
+ZAKTUALIZUJ	815 1254
+PÓŹNIEJ	862 1403
+POMIŃ TĘ WERSJĘ	772 1552
