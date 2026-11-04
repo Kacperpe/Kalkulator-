@@ -11,7 +11,8 @@ android {
         applicationId = "pl.kacper.kalkulator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 12
+        // CI podaje -PbuildNumber=<numer budowania>; tag wydania to v<numer>, a aplikacja porównuje 100 + numer
+        versionCode = (project.findProperty("buildNumber") as String?)?.toIntOrNull()?.plus(100) ?: 12
         versionName = "1.8"
         ndk {
             // Telefon: arm64. Do testów na emulatorze można dodać x86_64: -Pabis=arm64-v8a,x86_64

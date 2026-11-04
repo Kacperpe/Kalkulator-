@@ -637,6 +637,7 @@ class MainActivity : Activity() {
         applyTheme(prefs.getInt("theme", 0))
         buildUi()
         if (savedInstanceState == null) handleShared(intent)
+        Updater.check(this, false) { note(it); refresh() }
     }
 
     private fun savePrefs() {
@@ -877,6 +878,8 @@ class MainActivity : Activity() {
         drawerItem(list, "Macierze") { matrixDialog() }
         drawerHeader(list, "WYGLĄD")
         drawerItem(list, "Skórka") { themeDialog() }
+        drawerHeader(list, "APLIKACJA")
+        drawerItem(list, "Sprawdź aktualizacje") { Updater.check(this, true) { note(it); refresh() } }
         val sv = ScrollView(this)
         sv.setBackgroundColor(cPanel)
         sv.addView(list)

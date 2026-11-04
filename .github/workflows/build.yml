@@ -41,7 +41,7 @@ jobs:
         run: gradle testDebugUnitTest --no-daemon 2>&1 | tee test.log
 
       - name: Build APK
-        run: gradle assembleRelease --no-daemon 2>&1 | tee build.log
+        run: gradle assembleRelease -PbuildNumber=${{ github.run_number }} --no-daemon 2>&1 | tee build.log
 
       - name: Przygotuj plik
         run: cp app/build/outputs/apk/release/app-release.apk Kalkulator.apk && ls -la Kalkulator.apk
@@ -51,6 +51,7 @@ jobs:
         with:
           tag_name: v${{ github.run_number }}
           name: Kalkulator v${{ github.run_number }}
+          body: ${{ github.event.head_commit.message }}
           files: Kalkulator.apk
 
       - name: Opublikuj w gałęzi apk (zapasowy link do pobrania)
